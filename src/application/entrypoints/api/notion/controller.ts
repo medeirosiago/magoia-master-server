@@ -7,11 +7,13 @@ const { NOTION_PAGE_ID, NOTION_KEY } = process.env;
 
 export const fetchDatabase = async (req: Request, res: Response) => {
   const databaseId = NOTION_PAGE_ID;
+  console.log("🚀 ~ fetchDatabase ~ databaseId:", databaseId)
+  
   try {
     const data = await getDatabase(databaseId);
     res.status(200).json(data);
   } catch (error) {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ ...error });
   }
 };
 
