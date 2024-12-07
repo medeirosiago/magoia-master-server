@@ -12,7 +12,7 @@ const { PI_LOCAL_ADDRESS, PI_LOCAL_PORT } = process.env;
 app.use(express.json());
 
 // Conecta o roteador principal ao servidor
-app.use('/api', apiRouter); // Todas as rotas em `apiRouter` estarão sob o prefixo `/api`
+app.use('/api', apiRouter);
 
 // Inicializa o servidor
 app.listen(PI_LOCAL_PORT, () => {

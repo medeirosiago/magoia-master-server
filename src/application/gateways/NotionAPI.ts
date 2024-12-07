@@ -1,4 +1,6 @@
 import { Client } from '@notionhq/client';
+import dotenv from 'dotenv';
+dotenv.config();
 
 // Initializing a client
 const notion = new Client({
@@ -6,14 +8,15 @@ const notion = new Client({
 });
 
 export const getDatabase = async (databaseId: string) => {
+  console.log("🚀 ~ process.env.NOTION_TOKEN:", process.env.NOTION_TOKEN)
+
   try {
     const response = await notion.databases.query({
       database_id: databaseId,
     });
     return response;
   } catch (error) {
-    console.error('Error fetching database:', error);
-    throw new Error('Failed to fetch database');
+    throw error;
   }
 };
 
