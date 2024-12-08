@@ -8,7 +8,6 @@ const notion = new Client({
 });
 
 export const getDatabase = async (databaseId: string) => {
-  console.log("🚀 ~ process.env.NOTION_TOKEN:", process.env.NOTION_TOKEN)
 
   try {
     const response = await notion.databases.query({
