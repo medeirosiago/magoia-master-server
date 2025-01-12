@@ -20,7 +20,10 @@
     "express": "^4.21.2",
     "inversify": "^6.2.0",
     "module-alias": "^2.2.3",
+    "next": "^15.1.4",
     "openai": "^4.77.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
     "reflect-metadata": "^0.2.2"
   },
   "devDependencies": {
