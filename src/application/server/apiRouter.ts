@@ -3,6 +3,7 @@
  */
 import { Router, Response } from 'express';
 import notionRouter from '@api/notion';
+import openaiRouter from '@application/entrypoints/api/openai';
 
 /**
  * Instance Router
@@ -17,5 +18,6 @@ router.get('/', (_req, res: Response) => {
 });
 
 router.use('/notion', notionRouter);
+router.use('/gpt', openaiRouter);
 
 export default router;

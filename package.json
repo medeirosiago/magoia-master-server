@@ -6,7 +6,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start-dev": "nodemon --watch src --exec ts-node src/application/server/index.ts",
     "build": "tsc",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "lint": "eslint ./src"
   },
   "keywords": [],
   "author": "",
@@ -16,14 +17,22 @@
     "@notionhq/client": "^2.2.15",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
-    "module-alias": "^2.2.3"
+    "inversify": "^6.2.0",
+    "module-alias": "^2.2.3",
+    "openai": "^4.77.0",
+    "reflect-metadata": "^0.2.2"
   },
   "devDependencies": {
+    "@eslint/js": "^9.16.0",
     "@types/express": "^5.0.0",
+    "@types/module-alias": "^2.0.4",
     "@types/node": "^22.10.1",
+    "eslint": "^9.16.0",
+    "globals": "^15.13.0",
     "nodemon": "^3.1.7",
     "ts-node": "^10.9.2",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.17.0"
   },
   "_moduleAliases": {
     "@application": "./dist/application",
