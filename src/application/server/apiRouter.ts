@@ -4,6 +4,7 @@
 import { Router, Response } from 'express';
 import notionRouter from '@api/notion';
 import openaiRouter from '@application/entrypoints/api/openai';
+import homeAssitantRouter from '@application/entrypoints/api/homeassistant'
 
 /**
  * Instance Router
@@ -19,5 +20,6 @@ router.get('/', (_req, res: Response) => {
 
 router.use('/notion', notionRouter);
 router.use('/gpt', openaiRouter);
+router.use('/ha', homeAssitantRouter);
 
 export default router;

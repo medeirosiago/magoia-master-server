@@ -15,6 +15,7 @@
   "description": "",
   "dependencies": {
     "@notionhq/client": "^2.2.15",
+    "config": "^3.3.12",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "inversify": "^6.2.0",

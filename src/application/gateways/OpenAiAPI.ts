@@ -9,7 +9,6 @@ const openai = new OpenAI({
 
 export const getText = async (prompt: string) => {
 	try {
-		console.log("🚀 ~ getText ~ prompt:", prompt);
 
 		const response = await openai.chat.completions.create({
 			model: "gpt-4o-mini",

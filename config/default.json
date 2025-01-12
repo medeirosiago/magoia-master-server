@@ -1,0 +1,5 @@
+{
+  "raspberrypi": {
+    "baseUrl":"http://raspberrypi.local:8123/api"
+	}
+}
