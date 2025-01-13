@@ -6,6 +6,7 @@ import { Lights } from "@domain/usecases/homeassistant/lights";
 const lightsUseCase = container.get(Lights);
 
 export const on = async (req: Request, res: Response) => {
+	console.log('chegando na controller');
 	try {
 		const data = await lightsUseCase.on();
 		res.status(200).json(data);
