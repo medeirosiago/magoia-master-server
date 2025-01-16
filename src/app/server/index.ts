@@ -1,4 +1,4 @@
 /**
  * Start server with bootstrap
  */
-export { default } from './bootstrap';
+export { default } from "./bootstrap";

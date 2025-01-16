@@ -1,4 +1,3 @@
-
 export interface NotionDatabaseResponse {
   object: string; // Tipo do objeto retornado, geralmente "list"
   results: NotionPage[]; // Lista de páginas ou itens do banco de dados

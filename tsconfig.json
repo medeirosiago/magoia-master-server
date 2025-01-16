@@ -1,20 +1,11 @@
 {
-  "include": [
-    "src/**/*",
-    ".next/types/**/*.ts"
-  ],
+  "include": ["src/**/*", ".next/types/**/*.ts"],
   "compilerOptions": {
     "baseUrl": "./src",
     "paths": {
-      "@application/*": [
-        "application/*"
-      ],
-      "@domain/*": [
-        "domain/*"
-      ],
-      "@api/*": [
-        "application/entrypoints/api/*"
-      ]
+      "@app/*": ["app/*"],
+      "@domain/*": ["domain/*"],
+      "@api/*": ["application/entrypoints/api/*"]
     },
     "target": "es2020",
     "module": "commonjs",
@@ -29,11 +20,7 @@
     "skipLibCheck": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "noEmit": true,
     "incremental": true,
     "moduleResolution": "node",
@@ -45,7 +32,5 @@
       }
     ]
   },
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }
