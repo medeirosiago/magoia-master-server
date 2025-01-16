@@ -9,7 +9,7 @@ export default function RootLayout({
   return (
     <html lang="pt-br">
       <head>
-        <link href="./src/public/output.css" rel="stylesheet" />
+        <link href="/styles/output.css" rel="stylesheet" />
       </head>
       <body>
         <Providers>{children}</Providers>

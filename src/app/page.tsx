@@ -1,18 +1,25 @@
 "use client";
 
 import * as React from "react";
-
 import { Button } from "@nextui-org/button";
+import { WebSocketProvider, useWebSocketContext } from "./WebSocketProvider.jsx";
+import { turnLightsOn, turnLightsOff } from "./services/turnLights";
 
-import { turnLightsOn, turnLightsOff } from "./services/turnLights"; // Importe as funções do serviço
+export default function PageWrapper() {
+  return (
+    <WebSocketProvider>
+      <Page />
+    </WebSocketProvider>
+  );
+}
 
-import { NextUIProvider } from "@nextui-org/react";
-import { ThemeProvider as NextThemesProvider } from "next-themes";
+function Page() {
+  const { sendMessage, lastMessage, connectionStatus } = useWebSocketContext();
 
-export default function Page() {
   const handleTurnOn = async () => {
     try {
       const result = await turnLightsOn();
+      sendMessage(JSON.stringify({ type: "light", action: "on" }));
       console.log(result);
     } catch (error) {
       console.error(error);
@@ -22,6 +29,7 @@ export default function Page() {
   const handleTurnOff = async () => {
     try {
       const result = await turnLightsOff();
+      sendMessage(JSON.stringify({ type: "light", action: "off" }));
       console.log(result);
     } catch (error) {
       console.error(error);
@@ -29,8 +37,7 @@ export default function Page() {
   };
 
   return (
-    // <div className="max-w-fit p-4">
-    <div className="flex justify-center items-center gap-4 w-screen h-screen	p-10">
+    <div className="flex justify-center items-center gap-4 w-screen h-screen p-10">
       <Button
         className="w-full h-full text-lg"
         color="primary"
@@ -47,7 +54,8 @@ export default function Page() {
       >
         Desligar todas as luzes
       </Button>
+      <p>Status da conexão: {connectionStatus}</p>
+      {lastMessage && <p>Última mensagem: {lastMessage.data}</p>}
     </div>
-    // </div>
   );
 }

@@ -12,7 +12,7 @@ const { PI_LOCAL_ADDRESS, PI_LOCAL_PORT } = process.env;
 
 app.use(
   cors({
-    origin: "http://localhost:3000", // Altere para a URL do seu frontend
+    origin: "http://raspberrypi:3000", // Altere para a URL do seu frontend
     methods: ["GET", "POST", "PUT", "DELETE"], // Métodos permitidos
     allowedHeaders: ["Content-Type", "Authorization"], // Cabeçalhos permitidos
   }),

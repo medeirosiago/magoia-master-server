@@ -1,5 +1,5 @@
-import dotenv from "dotenv";
 import config from "config";
+import dotenv from "dotenv";
 
 dotenv.config();
 
