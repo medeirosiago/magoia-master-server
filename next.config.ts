@@ -1,11 +1,26 @@
-import type { NextConfig } from "next";
+const path = require('path');
 
-const nextConfig: NextConfig = {
-  eslint: {
-    // Warning: This allows production builds to successfully complete even if
-    // your project has ESLint errors.
-    ignoreDuringBuilds: true,
+module.exports = {
+  webpack(config) {
+    config.module.rules.push({
+      test: /\.css$/,
+      use: [
+        {
+          loader: 'postcss-loader',
+          options: {
+            postcssOptions: {
+              plugins: {
+                tailwindcss: {},
+                autoprefixer: {},
+              },
+            },
+          },
+        },
+      ],
+    });
+
+    // Configure paths
+    config.resolve.alias['@'] = path.resolve(__dirname);
+    return config;
   },
 };
-
-export default nextConfig;

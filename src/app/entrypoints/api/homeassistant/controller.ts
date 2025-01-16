@@ -1,6 +1,6 @@
 // src/application/entrypoints/api/notion/controller.ts
 import { Request, Response } from "express";
-import { container } from "app/configuration/ioc.config";
+import { container } from "@app/configuration/ioc.config";
 import { Lights } from "@domain/usecases/homeassistant/lights";
 
 const lightsUseCase = container.get(Lights);
