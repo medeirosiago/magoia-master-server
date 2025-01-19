@@ -1,9 +1,19 @@
 "use client";
 
-import * as React from "react";
+import React, { useEffect, useState } from "react";
+/**
+ * NextUi Components
+ */
 import { Button } from "@nextui-org/button";
-import { WebSocketProvider, useWebSocketContext } from "./WebSocketProvider.jsx";
-import { turnLightsOn, turnLightsOff } from "./services/turnLights";
+/**
+ * HA
+ */
+import { WebSocketProvider, useWebSocketContext } from "./haProvider/WebSocketProvider";
+
+/**
+ * Entities
+ */
+import { HvacMode } from "./haProvider/entities";
 
 export default function PageWrapper() {
   return (
@@ -14,48 +24,84 @@ export default function PageWrapper() {
 }
 
 function Page() {
-  const { sendMessage, lastMessage, connectionStatus } = useWebSocketContext();
+  const {
+    connectionStatus,
+    states,
+    getState,
+    callService,
+    // subscribeEvents,
+    // unsubscribeEvents,
+  } = useWebSocketContext();
 
-  const handleTurnOn = async () => {
-    try {
-      const result = await turnLightsOn();
-      sendMessage(JSON.stringify({ type: "light", action: "on" }));
-      console.log(result);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  // Pegamos a entity do ar, caso exista
+  const airEntity = getState("climate.ar");
+  // Da entity, obtemos o "state" (ex.: "off", "cool", "heat", etc.)
+  const airState = airEntity?.state; 
+  // Se `airEntity` ainda não foi carregada, airEntity será undefined.
+  
+  // Opcional: se quiser armazenar localmente (caso precise manipular):
+  // const [localAirState, setLocalAirState] = useState(airState);
+  // // Sincroniza quando "airState" mudar
+  // useEffect(() => {
+  //   setLocalAirState(airState);
+  // }, [airState]);
 
-  const handleTurnOff = async () => {
-    try {
-      const result = await turnLightsOff();
-      sendMessage(JSON.stringify({ type: "light", action: "off" }));
-      console.log(result);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  function ligarAr() {
+    callService({
+      domain: "climate",
+      service: "set_hvac_mode",
+      service_data: {
+        entity_id: "climate.ar",
+        hvac_mode: "cool",
+      },
+    })
+      .then((resposta) => {
+        console.log("Sucesso ao ligar ar:", resposta);
+      })
+      .catch((err) => console.error("Erro ao chamar serviço:", err));
+  }
 
+  function desligarAr() {
+    callService({
+      domain: "climate",
+      service: "turn_off",
+      service_data: {
+        entity_id: "climate.ar",
+      },
+    })
+      .then((resposta) => {
+        console.log("Sucesso ao desligar ar:", resposta);
+      })
+      .catch((err) => console.error("Erro ao chamar serviço:", err));
+  }
+
+  console.log("🚀 ~ Page ~ states:", states);
+  console.log("🚀 ~ Page ~ airEntity:", airEntity);
+
+  // Caso a entity ainda não exista no `states`, podemos exibir um loading
+  if (!airEntity) {
+    return (
+      <div className="w-screen h-screen flex items-center justify-center">
+        <p>Carregando informações do ar-condicionado...</p>
+      </div>
+    );
+  }
+
+  // Se chegou aqui, já temos airEntity
   return (
     <div className="flex justify-center items-center gap-4 w-screen h-screen p-10">
       <Button
         className="w-full h-full text-lg"
         color="primary"
         variant="shadow"
-        onPress={handleTurnOn}
+        // Caso esteja OFF, clica para ligar; caso contrário, clica para desligar
+        onPress={airState === HvacMode.OFF ? ligarAr : desligarAr}
       >
-        Ligar todas as luzes
+        {airState === HvacMode.OFF ? "LIGAR O AR" : "DESLIGAR O AR"}
       </Button>
-      <Button
-        className="w-full h-full text-lg"
-        color="secondary"
-        variant="shadow"
-        onPress={handleTurnOff}
-      >
-        Desligar todas as luzes
-      </Button>
+
       <p>Status da conexão: {connectionStatus}</p>
-      {lastMessage && <p>Última mensagem: {lastMessage.data}</p>}
+      <p>Estado do ar-condicionado: {airState}</p>
     </div>
   );
 }
