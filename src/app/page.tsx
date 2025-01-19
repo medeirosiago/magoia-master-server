@@ -17,6 +17,7 @@ import { WebSocketProvider, useWebSocketContext } from "./haProvider/WebSocketPr
 import { HvacMode, Climate } from "./haProvider/entities";
 import CardClimate from "./components/CardClimate";
 import PageContentWrapper from "./components/PageContentWrapper";
+import AnimatedBeam from "./components/animata/background/animated-beam";
 
 export default function PageWrapper() {
 	return (
@@ -106,9 +107,12 @@ function Page() {
 
       <p>Status da conexão: {connectionStatus}</p>
       <p>Estado do ar-condicionado: {airState}</p> */}
-			<PageContentWrapper
+			<AnimatedBeam>
+				<CardClimate airInfo={airEntity} changeTemperature={callService} />
+			</AnimatedBeam>
+			{/* <PageContentWrapper
 				components={[<CardClimate airInfo={airEntity} changeTemperature={callService} />]}
-			/>
+			/> */}
 		</div>
 	);
 }
