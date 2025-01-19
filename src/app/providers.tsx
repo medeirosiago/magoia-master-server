@@ -1,6 +1,6 @@
 "use client";
 
-import { NextUIProvider } from "@nextui-org/react";
+import { HeroUIProvider } from "@heroui/react";
 import { ThemeProvider } from "next-themes";
 import { useState, useEffect } from "react";
 
@@ -16,8 +16,8 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <NextUIProvider>
+    <HeroUIProvider>
       <ThemeProvider attribute="class">{children}</ThemeProvider>
-    </NextUIProvider>
+    </HeroUIProvider>
   ); // Wrap children with ThemeProvider after mount
 }

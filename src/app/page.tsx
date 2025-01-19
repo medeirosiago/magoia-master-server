@@ -4,7 +4,8 @@ import React, { useEffect, useState } from "react";
 /**
  * NextUi Components
  */
-import { Button } from "@nextui-org/button";
+import { Button } from "@heroui/button";
+
 /**
  * HA
  */
@@ -13,84 +14,87 @@ import { WebSocketProvider, useWebSocketContext } from "./haProvider/WebSocketPr
 /**
  * Entities
  */
-import { HvacMode } from "./haProvider/entities";
+import { HvacMode, Climate } from "./haProvider/entities";
+import CardClimate from "./components/CardClimate";
+import PageContentWrapper from "./components/PageContentWrapper";
 
 export default function PageWrapper() {
-  return (
-    <WebSocketProvider>
-      <Page />
-    </WebSocketProvider>
-  );
+	return (
+		<WebSocketProvider>
+			<Page />
+		</WebSocketProvider>
+	);
 }
 
 function Page() {
-  const {
-    connectionStatus,
-    states,
-    getState,
-    callService,
-    // subscribeEvents,
-    // unsubscribeEvents,
-  } = useWebSocketContext();
+	const {
+		connectionStatus,
+		states,
+		getState,
+		callService,
+		// subscribeEvents,
+		// unsubscribeEvents,
+	} = useWebSocketContext();
 
-  // Pegamos a entity do ar, caso exista
-  const airEntity = getState("climate.ar");
-  // Da entity, obtemos o "state" (ex.: "off", "cool", "heat", etc.)
-  const airState = airEntity?.state; 
-  // Se `airEntity` ainda não foi carregada, airEntity será undefined.
-  
-  // Opcional: se quiser armazenar localmente (caso precise manipular):
-  // const [localAirState, setLocalAirState] = useState(airState);
-  // // Sincroniza quando "airState" mudar
-  // useEffect(() => {
-  //   setLocalAirState(airState);
-  // }, [airState]);
+	// Pegamos a entity do ar, caso exista
+	const airEntity: Climate = getState("climate.ar");
 
-  function ligarAr() {
-    callService({
-      domain: "climate",
-      service: "set_hvac_mode",
-      service_data: {
-        entity_id: "climate.ar",
-        hvac_mode: "cool",
-      },
-    })
-      .then((resposta) => {
-        console.log("Sucesso ao ligar ar:", resposta);
-      })
-      .catch((err) => console.error("Erro ao chamar serviço:", err));
-  }
+	// Da entity, obtemos o "state" (ex.: "off", "cool", "heat", etc.)
+	const airState = airEntity?.state;
+	// Se `airEntity` ainda não foi carregada, airEntity será undefined.
 
-  function desligarAr() {
-    callService({
-      domain: "climate",
-      service: "turn_off",
-      service_data: {
-        entity_id: "climate.ar",
-      },
-    })
-      .then((resposta) => {
-        console.log("Sucesso ao desligar ar:", resposta);
-      })
-      .catch((err) => console.error("Erro ao chamar serviço:", err));
-  }
+	// Opcional: se quiser armazenar localmente (caso precise manipular):
+	// const [localAirState, setLocalAirState] = useState(airState);
+	// // Sincroniza quando "airState" mudar
+	// useEffect(() => {
+	//   setLocalAirState(airState);
+	// }, [airState]);
 
-  console.log("🚀 ~ Page ~ states:", states);
-  console.log("🚀 ~ Page ~ airEntity:", airEntity);
+	function ligarAr() {
+		callService({
+			domain: "climate",
+			service: "set_hvac_mode",
+			service_data: {
+				entity_id: "climate.ar",
+				hvac_mode: "cool",
+			},
+		})
+			.then((resposta) => {
+				console.log("Sucesso ao ligar ar:", resposta);
+			})
+			.catch((err) => console.error("Erro ao chamar serviço:", err));
+	}
 
-  // Caso a entity ainda não exista no `states`, podemos exibir um loading
-  if (!airEntity) {
-    return (
-      <div className="w-screen h-screen flex items-center justify-center">
-        <p>Carregando informações do ar-condicionado...</p>
-      </div>
-    );
-  }
+	function desligarAr() {
+		callService({
+			domain: "climate",
+			service: "turn_off",
+			service_data: {
+				entity_id: "climate.ar",
+			},
+		})
+			.then((resposta) => {
+				console.log("Sucesso ao desligar ar:", resposta);
+			})
+			.catch((err) => console.error("Erro ao chamar serviço:", err));
+	}
 
-  // Se chegou aqui, já temos airEntity
-  return (
-    <div className="flex justify-center items-center gap-4 w-screen h-screen p-10">
-      <Button
+	console.log("🚀 ~ Page ~ states:", states);
+	console.log("🚀 ~ Page ~ airEntity:", airEntity);
+
+	// Caso a entity ainda não exista no `states`, podemos exibir um loading
+	if (!airEntity) {
+		return (
+			<div className="w-screen h-screen flex items-center justify-center">
+				<p>Carregando informações do ar-condicionado...</p>
+			</div>
+		);
+	}
+
+	// Se chegou aqui, já temos airEntity
+	return (
+		<div>
+			{/* <Button
         className="w-full h-full text-lg"
         color="primary"
         variant="shadow"
@@ -101,7 +105,10 @@ function Page() {
       </Button>
 
       <p>Status da conexão: {connectionStatus}</p>
-      <p>Estado do ar-condicionado: {airState}</p>
-    </div>
-  );
+      <p>Estado do ar-condicionado: {airState}</p> */}
+			<PageContentWrapper
+				components={[<CardClimate airInfo={airEntity} changeTemperature={callService} />]}
+			/>
+		</div>
+	);
 }
