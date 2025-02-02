@@ -76,9 +76,6 @@ export function useHomeAssistant(options = {}) {
     if (!lastJsonMessage) return;
     const data: any = lastJsonMessage;
 
-    console.log("[useEffect => lastJsonMessage]", data);
-    console.log("[useEffect => promisesRef.current]", promisesRef.current);
-
     // 1) Mensagens de autenticação
     if (data.type === "auth_ok") {
       setConnectionStatus("authenticated");

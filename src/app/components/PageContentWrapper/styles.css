@@ -1,7 +1,5 @@
 .page-content-wrapper {
 	display: flex;
+	flex-direction: column;
 	width: 100%;
-	padding: 6px;
-	outline: 2px solid red;
-
 }

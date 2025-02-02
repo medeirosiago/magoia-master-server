@@ -72,21 +72,26 @@ function Background() {
 	return (
 		<div
 			ref={containerRef}
-			className="-z-1 absolute inset-0 flex h-full w-full flex-row justify-between bg-gradient-to-t from-indigo-900 to-indigo-950"
+		
+			style={{
+				background:
+					"linear-gradient(180deg, rgba(78,88,167,1) 0%, rgba(108,128,197,1) 50%, rgba(137,158,209,1) 70%, rgba(175,191,225,1) 89%)",
+			}}
+				className="-z-1 absolute inset-0 flex h-full w-full flex-row justify-between dark:bg-background/80"
 		>
 			<div
-				style={{
-					background:
-						"radial-gradient(50% 50% at 50% 50%,#072a39 0%,rgb(7,42,57) 50%,rgba(7,42,57,0) 100%)",
-				}}
+				// style={{
+				// 	background:
+				// 		"radial-gradient(50% 50% at 50% 50%,#072a39 0%,rgba(78,88,167,1) 50%,rgba(7,42,57,0) 100%)",
+				// }}
 				className="absolute inset-0 top-1/2 h-full w-full rounded-full opacity-40"
 			/>
-
+			{/* 
 			<div className="pointer-events-none absolute inset-0 z-0 flex items-end justify-center pb-14">
 				<FibonacciLines className="w-full" />
-			</div>
+			</div> */}
 			{Array.from({ length: count }, (_, i) => (
-				<div key={i} className="relative h-full w-px rotate-12 bg-gray-100 bg-opacity-10">
+				<div key={i} className="relative h-full w-px rotate-0">
 					{(1 + i) % 4 === 0 && <Beam index={i + 1} />}
 				</div>
 			))}
