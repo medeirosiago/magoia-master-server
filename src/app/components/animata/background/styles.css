@@ -1,0 +1,14 @@
+#svg-filter {
+	display: none;
+}
+
+#cloud-circle {
+	width: 400px;
+	height: 175px;
+	border-radius: 50%;
+	filter: url(#filter);
+	box-shadow: 400px 400px 60px 0px #fff;
+	position: absolute;
+	top: -240px;
+	left: -600px;
+}

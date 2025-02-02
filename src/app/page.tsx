@@ -105,6 +105,7 @@ function Page() {
 		<div>
 			<PageContentWrapper
 				components={[<CardClimate airInfo={airEntity} changeTemperature={callService} />]}
+				weatherConfigs={weatherConfigs({ attributes: weatherEntity?.attributes, dateTime: clockEntity?.state, forecast: forecastState })}
 			/>
 		</div>
 	);

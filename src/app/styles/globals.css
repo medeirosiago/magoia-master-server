@@ -3,6 +3,7 @@
 @tailwind utilities;
 @import "../components/CardClimate/styles.css";
 @import "../components/PageContentWrapper/styles.css";
+@import "../components/animata/background/styles.css";
 
 // <uniquifier>: Use a unique and descriptive class name
 // <weight>: Use a value from 300 to 800

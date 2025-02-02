@@ -19,10 +19,10 @@ import FluidTabs from "../animata/card/fluid-tabs";
 /**
  * Component
  */
-const PageContentWrapper = ({ components }) => {
+const PageContentWrapper = ({ components, weatherConfigs }) => {
 	return (
 		<div className="page-content-wrapper">
-			<AnimatedBeam>
+			<AnimatedBeam weatherConfigs={weatherConfigs}>
 				<FluidTabs />
 				{components.map((component, index) => (
 					<React.Fragment key={index}>

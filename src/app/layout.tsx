@@ -12,6 +12,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 					href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap"
 					rel="stylesheet"
 				/>
+				<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/2.0.1/TweenLite.min.js"></script>
+				<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/2.0.1/TimelineMax.min.js"></script>
 			</head>
 			<body>
 				<Providers>{children}</Providers>
