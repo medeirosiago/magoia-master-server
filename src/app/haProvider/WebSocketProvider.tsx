@@ -153,8 +153,6 @@ export function useHomeAssistant(options = {}) {
         timeout,
       };
 
-      console.log("[send] final msg =>", msg);
-      console.log("[send] promisesRef =>", promisesRef.current);
 
       sendJsonMessage(msg);
     });
@@ -176,10 +174,8 @@ export function useHomeAssistant(options = {}) {
       type: "subscribe_events",
       event_type,
     };
-    console.log("[subscribeEvents] subscribeData =>", subscribeData);
 
     return send(subscribeData).then((data: any) => {
-      console.log("[subscribeEvents => then]", data, "id =", data.id);
 
       if (!data.success) {
         return Promise.reject(new Error("Falha ao assinar evento: " + event_type));
@@ -218,7 +214,6 @@ export function useHomeAssistant(options = {}) {
   // Atualiza estado local quando receber "state_changed"
   function updateState(change) {
     const { event } = change;
-    console.log("🚀 ~ updateState ~ event:", event);
     if (!event || event.event_type !== "state_changed") return;
 
     const { data } = event; // { entity_id, old_state, new_state }

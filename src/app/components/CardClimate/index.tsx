@@ -77,7 +77,6 @@ const CardClimate = ({ airInfo, changeTemperature }) => {
 			},
 		})
 			.then((resposta) => {
-				console.log("Sucesso ao ligar ar:", resposta);
 				setCurrentTemperature(attributes.temperature);
 			})
 			.catch((err) => console.error("Erro ao chamar serviço:", err));
@@ -91,9 +90,7 @@ const CardClimate = ({ airInfo, changeTemperature }) => {
 				entity_id: "climate.ar",
 			},
 		})
-			.then((resposta) => {
-				console.log("Sucesso ao desligar ar:", resposta);
-			})
+			.then((resposta) => resposta)
 			.catch((err) => console.error("Erro ao chamar serviço:", err));
 	}
 

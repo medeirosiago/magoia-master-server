@@ -13,7 +13,6 @@ export class Lights {
       "light",
       "off",
     );
-    console.log({ ...response });
     return response;
   }
 
@@ -23,7 +22,6 @@ export class Lights {
       "light",
       "on",
     );
-    console.log({ ...response });
     return response;
   }
 }

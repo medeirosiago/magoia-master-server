@@ -24,11 +24,11 @@ const PageContentWrapper = ({ components, weatherConfigs }) => {
 		<div className="page-content-wrapper">
 			<AnimatedBeam weatherConfigs={weatherConfigs}>
 				<FluidTabs />
-				{components.map((component, index) => (
-					<React.Fragment key={index}>
-						{component}
-					</React.Fragment>
-				))}
+				<div className="page-content-wrapper__components p-4">
+					{components.map((component, index) => (
+						<React.Fragment key={index}>{component}</React.Fragment>
+					))}
+				</div>
 			</AnimatedBeam>
 		</div>
 	);

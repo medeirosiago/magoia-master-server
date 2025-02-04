@@ -23,10 +23,8 @@ export const getText = async (prompt: string) => {
         },
       ],
     });
-    console.log("🚀 ~ getText ~ response:", response);
     return response;
   } catch (error) {
-    console.log("🚀 ~ getText ~ error:", error);
     throw new Error("failed to get gpt");
   }
 };

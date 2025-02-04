@@ -154,9 +154,9 @@ export default function AnimatedBeam({
 	weatherConfigs: any; // Idealmente, defina uma interface para esses dados
 }) {
 	return (
-		<div className={cn("relative min-h-screen p-[6px] overflow-hidden", className)}>
+		<div className={cn("relative min-h-screen overflow-hidden", className)}>
 			<Background weatherConfigs={weatherConfigs} />
-			<div className="relative h-full w-full">{children}</div>
+			<div className="absolute h-full w-full">{children}</div>
 		</div>
 	);
 }

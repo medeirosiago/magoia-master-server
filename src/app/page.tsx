@@ -47,51 +47,16 @@ function Page() {
 		// unsubscribeEvents,
 	} = useWebSocketContext();
 
-	// Pegamos a entity do ar, caso exista
 	const airEntity: Climate = getState("climate.ar");
 	const weatherEntity = getState("weather.astroweather_quarto");
 	const clockEntity = getState("sensor.date_time");
 	const forecastState = getState("weather.forecast_home")?.state;
-	console.log("🚀 ~ Page ~ forecastEntity:", forecastState);
 
-	// console.log(
-	// 	"my weatherConfigs",
-	// 	weatherEntity?.attributes &&
-	// 		clockEntity?.state &&
-	// 		weatherConfigs({ attributes: weatherEntity?.attributes, dateTime: clockEntity?.state }),
-	// );
+	const magoiaMonitor = getState("switch.monitor_goia");
+	console.log("🚀 ~ FluidTabs ~ magoiaMonitor from PAGE", magoiaMonitor);
 	const airState = airEntity?.state;
 
-	function ligarAr() {
-		callService({
-			domain: "climate",
-			service: "set_hvac_mode",
-			service_data: {
-				entity_id: "climate.ar",
-				hvac_mode: "cool",
-			},
-		})
-			.then((resposta) => {
-				console.log("Sucesso ao ligar ar:", resposta);
-			})
-			.catch((err) => console.error("Erro ao chamar serviço:", err));
-	}
 
-	function desligarAr() {
-		callService({
-			domain: "climate",
-			service: "turn_off",
-			service_data: {
-				entity_id: "climate.ar",
-			},
-		})
-			.then((resposta) => {
-				console.log("Sucesso ao desligar ar:", resposta);
-			})
-			.catch((err) => console.error("Erro ao chamar serviço:", err));
-	}
-
-	// Caso a entity ainda não exista no `states`, podemos exibir um loading
 	if (!airEntity) {
 		return (
 			<div className="w-screen h-screen flex items-center justify-center">
@@ -100,7 +65,6 @@ function Page() {
 		);
 	}
 
-	// Se chegou aqui, já temos airEntity
 	return (
 		<div>
 			<PageContentWrapper
