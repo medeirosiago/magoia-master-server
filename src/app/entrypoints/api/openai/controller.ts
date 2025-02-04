@@ -6,7 +6,6 @@ import { GetTextUsecase } from "@domain/usecases/openai/getText";
 const getTextUsecase = container.get(GetTextUsecase);
 
 export const getText = async (req: Request, res: Response) => {
-  console.log("🚀 ~ getText ~ req:", req.body.prompt);
   try {
     const data = await getTextUsecase.execute(req.body.prompt);
     res.status(200).json(data);

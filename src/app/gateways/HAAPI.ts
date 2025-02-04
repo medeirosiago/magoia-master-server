@@ -45,7 +45,6 @@ export const turnByEntityAndDomain = async (
       body: JSON.stringify({ entity_id: entityId }),
     });
 
-    console.log(`${haDomain} turned ${status} with status`, response.status);
 
     return response.status;
   } catch (error) {

@@ -1,61 +1,76 @@
 "use client";
 
-import * as React from "react";
-import { Button } from "@nextui-org/button";
-import { WebSocketProvider, useWebSocketContext } from "./WebSocketProvider.jsx";
-import { turnLightsOn, turnLightsOff } from "./services/turnLights";
+import React, { useEffect, useState } from "react";
 
+/**
+ * NextUi Components
+ */
+import { Button } from "@heroui/button";
+
+/**
+ * HA
+ */
+import { WebSocketProvider, useWebSocketContext } from "./haProvider/WebSocketProvider";
+
+/**
+ * Utils
+ */
+import formatTimestamp from "./utils/formatTimestamp";
+import { weatherConfigs } from "./utils/weatherConfigs";
+
+/**
+ * Entities
+ */
+import { HvacMode, Climate } from "./haProvider/entities";
+import CardClimate from "./components/CardClimate";
+import PageContentWrapper from "./components/PageContentWrapper";
+import AnimatedBeam from "./components/animata/background/animated-beam";
+
+/**
+ * Component
+ */
 export default function PageWrapper() {
-  return (
-    <WebSocketProvider>
-      <Page />
-    </WebSocketProvider>
-  );
+	return (
+		<WebSocketProvider>
+			<Page />
+		</WebSocketProvider>
+	);
 }
 
 function Page() {
-  const { sendMessage, lastMessage, connectionStatus } = useWebSocketContext();
+	const {
+		connectionStatus,
+		states,
+		getState,
+		callService,
+		// subscribeEvents,
+		// unsubscribeEvents,
+	} = useWebSocketContext();
 
-  const handleTurnOn = async () => {
-    try {
-      const result = await turnLightsOn();
-      sendMessage(JSON.stringify({ type: "light", action: "on" }));
-      console.log(result);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+	const airEntity: Climate = getState("climate.ar");
+	const weatherEntity = getState("weather.astroweather_quarto");
+	const clockEntity = getState("sensor.date_time");
+	const forecastState = getState("weather.forecast_home")?.state;
 
-  const handleTurnOff = async () => {
-    try {
-      const result = await turnLightsOff();
-      sendMessage(JSON.stringify({ type: "light", action: "off" }));
-      console.log(result);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+	const magoiaMonitor = getState("switch.monitor_goia");
+	console.log("🚀 ~ FluidTabs ~ magoiaMonitor from PAGE", magoiaMonitor);
+	const airState = airEntity?.state;
 
-  return (
-    <div className="flex justify-center items-center gap-4 w-screen h-screen p-10">
-      <Button
-        className="w-full h-full text-lg"
-        color="primary"
-        variant="shadow"
-        onPress={handleTurnOn}
-      >
-        Ligar todas as luzes
-      </Button>
-      <Button
-        className="w-full h-full text-lg"
-        color="secondary"
-        variant="shadow"
-        onPress={handleTurnOff}
-      >
-        Desligar todas as luzes
-      </Button>
-      <p>Status da conexão: {connectionStatus}</p>
-      {lastMessage && <p>Última mensagem: {lastMessage.data}</p>}
-    </div>
-  );
+
+	if (!airEntity) {
+		return (
+			<div className="w-screen h-screen flex items-center justify-center">
+				<p>Carregando informações do ar-condicionado...</p>
+			</div>
+		);
+	}
+
+	return (
+		<div>
+			<PageContentWrapper
+				components={[<CardClimate airInfo={airEntity} changeTemperature={callService} />]}
+				weatherConfigs={weatherConfigs({ attributes: weatherEntity?.attributes, dateTime: clockEntity?.state, forecast: forecastState })}
+			/>
+		</div>
+	);
 }
