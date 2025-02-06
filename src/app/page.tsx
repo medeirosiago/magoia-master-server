@@ -27,6 +27,11 @@ import PageContentWrapper from "./components/PageContentWrapper";
 import AnimatedBeam from "./components/animata/background/animated-beam";
 
 /**
+ * Icons
+ */
+import SnowFlakeIcon from "@app/components/LottieIcons/looties/snowflake.json";
+
+/**
  * Component
  */
 export default function PageWrapper() {
@@ -38,9 +43,17 @@ export default function PageWrapper() {
 }
 
 function Page() {
+	// Função para remover o botão direito ao segunrar o touch
+	// useEffect(() => {
+	// 	const disableContextMenu = (e: Event) => e.preventDefault();
+	// 	document.addEventListener("contextmenu", disableContextMenu);
+
+	// 	return () => document.removeEventListener("contextmenu", disableContextMenu);
+	// }, []);
+
 	const {
-		connectionStatus,
-		states,
+		// connectionStatus,
+		// states,
 		getState,
 		callService,
 		// subscribeEvents,
@@ -52,10 +65,7 @@ function Page() {
 	const clockEntity = getState("sensor.date_time");
 	const forecastState = getState("weather.forecast_home")?.state;
 
-	const magoiaMonitor = getState("switch.monitor_goia");
-	console.log("🚀 ~ FluidTabs ~ magoiaMonitor from PAGE", magoiaMonitor);
-	const airState = airEntity?.state;
-
+	const isAirOn = airEntity?.state !== "off";
 
 	if (!airEntity) {
 		return (
@@ -68,8 +78,19 @@ function Page() {
 	return (
 		<div>
 			<PageContentWrapper
-				components={[<CardClimate airInfo={airEntity} changeTemperature={callService} />]}
-				weatherConfigs={weatherConfigs({ attributes: weatherEntity?.attributes, dateTime: clockEntity?.state, forecast: forecastState })}
+				components={[
+					<CardClimate
+						airInfo={airEntity}
+						changeTemperature={callService}
+						icon={SnowFlakeIcon}
+						isOn={isAirOn}
+					/>,
+				]}
+				weatherConfigs={weatherConfigs({
+					attributes: weatherEntity?.attributes,
+					dateTime: clockEntity?.state,
+					forecast: forecastState,
+				})}
 			/>
 		</div>
 	);
