@@ -1,17 +1,18 @@
 "use client";
 
 import React, { useCallback, useState, useEffect } from "react";
-import Lottie from "react-lottie";
-import Cold from "../looties/cold.json";
-import AirOffIcon from "../looties/airOffIcon.json";
 
 /*
  * NextUI Components
  */
 import { Card, CardHeader, CardBody, CardFooter } from "@heroui/card";
-import { Button, ButtonGroup } from "@heroui/button";
-
+import { Button } from "@heroui/button";
 import { Slider } from "@heroui/slider";
+
+/**
+ * HOCs
+ */
+import MinimalCard from "../MinimalCard";
 
 /**
  * Entities
@@ -24,25 +25,9 @@ import { useTheme } from "next-themes";
 /**
  * Component
  */
-const CardClimate = ({ airInfo, changeTemperature }) => {
+const CardClimate = ({ airInfo, changeTemperature, isOn }) => {
 	const { attributes, state } = airInfo;
 	const [currentTemperature, setCurrentTemperature] = useState(attributes.temperature);
-
-	const [icon, setIcon] = useState<React.ReactNode>(<h1>OFF</h1>);
-
-	// Toda a lógica de trocar ícone fica no useEffect
-	useEffect(() => {
-		if (state === HvacMode.COOL) {
-			// primeiro ícone
-			setIcon(<Lottie options={airOnOption} height={100} width={200} />);
-			// depois de 1 segundo (exemplo) troca
-			setTimeout(() => {
-				setIcon(<Lottie options={defaultOptions} height={210} width={210} />);
-			}, 1000);
-		} else {
-			setIcon(<h1>OFF</h1>);
-		}
-	}, [airInfo]);
 
 	useEffect(() => {
 		setCurrentTemperature(attributes.temperature);
@@ -50,23 +35,6 @@ const CardClimate = ({ airInfo, changeTemperature }) => {
 
 	const isOff = (state) => state === HvacMode.OFF;
 
-	const defaultOptions = {
-		loop: true,
-		autoplay: true,
-		animationData: Cold,
-		rendererSettings: {
-			preserveAspectRatio: "xMidYMid slice",
-		},
-	};
-
-	const airOnOption = {
-		loop: true,
-		autoplay: true,
-		animationData: AirOffIcon,
-		rendererSettings: {
-			preserveAspectRatio: "xMidYMid slice",
-		},
-	};
 	function ligarAr() {
 		changeTemperature({
 			domain: "climate",
@@ -200,4 +168,4 @@ const CardClimate = ({ airInfo, changeTemperature }) => {
 	);
 };
 
-export default CardClimate;
+export default MinimalCard(CardClimate);
