@@ -43,6 +43,7 @@ export default function PageWrapper() {
 }
 
 function Page() {
+	// Função para remover o botão direito ao segunrar o touch
 	// useEffect(() => {
 	// 	const disableContextMenu = (e: Event) => e.preventDefault();
 	// 	document.addEventListener("contextmenu", disableContextMenu);
@@ -51,8 +52,8 @@ function Page() {
 	// }, []);
 
 	const {
-		connectionStatus,
-		states,
+		// connectionStatus,
+		// states,
 		getState,
 		callService,
 		// subscribeEvents,
@@ -64,8 +65,6 @@ function Page() {
 	const clockEntity = getState("sensor.date_time");
 	const forecastState = getState("weather.forecast_home")?.state;
 
-	const magoiaMonitor = getState("switch.monitor_goia");
-	const airState = airEntity?.state;
 	const isAirOn = airEntity?.state !== "off";
 
 	if (!airEntity) {

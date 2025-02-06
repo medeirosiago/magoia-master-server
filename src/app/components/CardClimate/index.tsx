@@ -17,9 +17,7 @@ import MinimalCard from "../MinimalCard";
 /**
  * Entities
  */
-import { CallServiceMessage, Climate, HvacMode } from "@app/haProvider/entities";
-import GlowingCard from "../animata/card/glowing-card";
-
+import { HvacMode } from "@app/haProvider/entities";
 import { useTheme } from "next-themes";
 
 /**

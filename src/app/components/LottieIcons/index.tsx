@@ -14,7 +14,7 @@ export default function LottieIcon({ animationData, styles }: LottieIconProps) {
 		autoplay: true,
 		animationData,
 		rendererSettings: {
-			preserveAspectRatio: "xMidYMid meet", // Alterado para "meet" para encaixar no container
+			preserveAspectRatio: "xMidYMid meet",
 		},
 	};
 

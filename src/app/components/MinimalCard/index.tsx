@@ -3,19 +3,27 @@
 import React, { useState, useRef } from "react";
 
 /**
- * Icons Component
+ * Components
  */
 import LottieIcon from "../LottieIcons";
-import { LucideIcon, Square } from "lucide-react"; // Ícone padrão
-
-import { cn } from "@/lib/utils"; // Se você tiver uma função utilitária para classes
 import { Card, CardBody } from "@heroui/card";
 
+/**
+ * Utils
+ */
+import { cn } from "@/lib/utils";
+
+/**
+ * Types
+ */
 interface MinimalCardProps {
 	icon?: any;
 	isOn: boolean;
 }
 
+/**
+ * MinimalCard Component
+ */
 export default function MinimalCard<T extends object>(WrappedComponent: React.ComponentType<T>) {
 	return function (props: T & MinimalCardProps) {
 		const [isMinimal, setIsMinimal] = useState(false);
