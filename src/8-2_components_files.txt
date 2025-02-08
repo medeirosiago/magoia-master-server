@@ -1,0 +1,872 @@
+[ File: /home/imedeiros/apps/magoia-master-server/src/app/components/animata/background/animated-beam.tsx ]
+-----
+"use client";
+
+import React, { useEffect, useRef, useState } from "react";
+import { cn } from "@/lib/utils";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
+
+gsap.registerPlugin(useGSAP);
+
+/* -----------------------------------------------------------------
+   Efeito de "beans" para o forecast rainy (chuva)
+------------------------------------------------------------------ */
+function Beam({ index }: { index: number }) {
+	const flag = index % 8 === 0;
+	return (
+		<div
+			className={cn("h-full animate-meteor", {
+				"[--duration:7s]": flag,
+				"[--duration:11s]": !flag,
+			})}
+			style={{
+				width: "6px",
+				transform: "translateY(-20%)",
+				["--delay" as any]: `${index * 0.5}s`,
+			}}
+		>
+			<div
+				style={{
+					clipPath: "polygon(54% 0, 54% 0, 60% 100%, 40% 100%)",
+				}}
+				className={cn("w-full", {
+					"h-8": flag,
+					"h-12": !flag,
+				})}
+			>
+				<div className="h-full w-full bg-gradient-to-b from-neutral-50/50 via-neutral-100 via-75% to-neutral-50" />
+			</div>
+		</div>
+	);
+}
+
+/* -----------------------------------------------------------------
+   Hook para calcular a quantidade de colunas (para o efeito rainy)
+------------------------------------------------------------------ */
+function useGridCount() {
+	const containerRef = useRef<HTMLDivElement>(null);
+	const [count, setCount] = useState(0);
+
+	useEffect(() => {
+		const updateCount = () => {
+			const rect = containerRef.current?.getBoundingClientRect();
+			if (!rect) return;
+			const cellSize = 40;
+			setCount(Math.ceil(rect.width / cellSize));
+		};
+		updateCount();
+		window.addEventListener("resize", updateCount);
+		return () => window.removeEventListener("resize", updateCount);
+	}, []);
+
+	return { count, containerRef };
+}
+
+/* -----------------------------------------------------------------
+   Componente para renderizar o efeito rainy (chuva / beans)
+------------------------------------------------------------------ */
+function RainyEffect() {
+	const { count, containerRef } = useGridCount();
+	return (
+		<div ref={containerRef} className="absolute inset-0">
+			{Array.from({ length: count }, (_, i) => (
+				<div key={i} className="relative h-full w-px">
+					{(i + 1) % 4 === 0 && <Beam index={i + 1} />}
+				</div>
+			))}
+		</div>
+	);
+}
+
+/* -----------------------------------------------------------------
+   Componente InfiniteClouds para o forecast "cloudy"
+   Aqui criamos um container que contém duas cópias do conjunto de nuvens.
+   O container é animado com 'animate-cloud-scroll', fazendo com que as nuvens
+   se movam continuamente para a esquerda em loop infinito.
+------------------------------------------------------------------ */
+function InfiniteClouds() {
+	const tl = gsap.timeline({ repeat: -1 });
+	tl.to("#cloud-circle", {
+		duration: 50, // duração de 50 segundos
+		x: 1000, // move 1000px no eixo X
+		ease: "linear", // utiliza uma easing linear (equivalente ao Linear.easeNone)
+	});
+	return (
+		<>
+			<div id="cloud-circle"></div>
+
+			<svg id="svg-filter" width="0" height="0">
+				<filter id="filter">
+					<feTurbulence type="fractalNoise" baseFrequency=".01" numOctaves="10" />
+					<feDisplacementMap in="SourceGraphic" scale="180" />
+				</filter>
+			</svg>
+		</>
+	);
+}
+
+/* -----------------------------------------------------------------
+   Função para definir a tonalização do background (dia ou noite)
+------------------------------------------------------------------ */
+const getBackgroundStyle = (weatherConfigs: any) => {
+	if (weatherConfigs.astro === "moon") {
+		return {
+			background:
+				"linear-gradient(180deg, #0a0a2a 0%, #0a0a2a 50%, #07072c 70%, #010018 89%)",
+		};
+	} else {
+		return {
+			background:
+				"linear-gradient(180deg, rgba(78,88,167,1) 0%, rgba(108,128,197,1) 50%, rgba(137,158,209,1) 70%, rgba(175,191,225,1) 89%)",
+		};
+	}
+};
+
+/* -----------------------------------------------------------------
+   Componente Background:
+   - Aplica a tonalização do fundo com base em 'astro' (dia ou noite).
+   - Dependendo do forecast:
+       • "cloudy": renderiza o efeito de nuvens com loop infinito (InfiniteClouds)
+       • "rainy": renderiza o efeito de chuva (RainyEffect)
+------------------------------------------------------------------ */
+function Background({ weatherConfigs }: { weatherConfigs: any }) {
+	const backgroundStyle = getBackgroundStyle(weatherConfigs);
+	return (
+		<div style={backgroundStyle} className="absolute inset-0">
+			{weatherConfigs.forecast === "cloudy" && <InfiniteClouds />}
+			{weatherConfigs.forecast === "rainy" && <RainyEffect />}
+		</div>
+	);
+}
+
+/* -----------------------------------------------------------------
+   Componente Principal AnimatedBeam:
+   Recebe o objeto weatherConfigs e renderiza:
+     - O background (com tonalização e overlays conforme o forecast)
+     - O conteúdo (_children_) por cima
+------------------------------------------------------------------ */
+export default function AnimatedBeam({
+	children,
+	className,
+	weatherConfigs,
+}: {
+	children: React.ReactNode;
+	className?: string;
+	weatherConfigs: any; // Idealmente, defina uma interface para esses dados
+}) {
+	return (
+		<div className={cn("relative min-h-screen overflow-hidden", className)}>
+			<Background weatherConfigs={weatherConfigs} />
+			<div className="absolute h-full w-full">{children}</div>
+		</div>
+	);
+}
+
+-----
+[ File: /home/imedeiros/apps/magoia-master-server/src/app/components/animata/card/fluid-tabs.tsx ]
+-----
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { BedDouble, House, BriefcaseBusiness } from "lucide-react";
+
+/**
+ * HA
+ */
+import { useWebSocketContext } from "@app/haProvider/WebSocketProvider";
+
+/**
+ * Hero UI
+ */
+import { Avatar, AvatarGroup } from "@heroui/react";
+
+/**
+ * Tabs config
+ */
+const tabs = [
+	{
+		id: "home",
+		label: "Home",
+		icon: <House size={18} />,
+	},
+	{
+		id: "room",
+		label: "Quarto",
+		icon: <BedDouble size={18} />,
+	},
+	{
+		id: "work",
+		label: "Trabalho",
+		icon: <BriefcaseBusiness size={18} />,
+	},
+];
+
+/**
+ * Component
+ */
+export default function FluidTabs() {
+	const [activeTab, setActiveTab] = useState("home");
+	const [touchedTab, setTouchedTab] = useState<string | null>(null);
+	const [prevActiveTab, setPrevActiveTab] = useState("home");
+	const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+	const { getState } = useWebSocketContext();
+	const { state: magoiaMonitor } = getState("switch.monitor_goia");
+	const { state: leticiaMonitor } = getState("switch.monitor_leticia");
+
+	useEffect(() => {
+		return () => {
+			if (timeoutRef.current) {
+				clearTimeout(timeoutRef.current);
+			}
+		};
+	}, []);
+
+	const handleTabClick = (tabId: string) => {
+		setPrevActiveTab(activeTab);
+		setActiveTab(tabId);
+		setTouchedTab(tabId);
+
+		if (timeoutRef.current) {
+			clearTimeout(timeoutRef.current);
+		}
+		timeoutRef.current = setTimeout(() => {
+			setTouchedTab(null);
+		}, 300);
+	};
+
+	const getTabIndex = (tabId: string) => tabs.findIndex((tab) => tab.id === tabId);
+
+	return (
+		<div className="grid grid-cols-[270px_540px_214px] items-center">
+			{/* Coluna da esquerda: Avatares alinhados à direita */}
+			<div className="flex items-center justify-end">
+				<AvatarGroup isBordered>
+					<Avatar
+						src="/images/let_avatar.jpg"
+						color="secondary"
+						isDisabled={leticiaMonitor !== "on"}
+					/>
+					<Avatar
+						src="/images/goia_avatar.jpg"
+						color="primary"
+						isDisabled={magoiaMonitor !== "on"}
+					/>
+				</AvatarGroup>
+			</div>
+
+			{/* Coluna do meio: Menu centralizado */}
+			<div className="flex items-center justify-center py-4">
+				<div className="relative flex w-full max-w-md space-x-2 overflow-hidden rounded-full bg-[#f5f1eb] shadow-lg dark:bg-background/80 backdrop-blur-md backdrop-saturate-150 transition-transform-background motion-reduce:transition-none">
+					<AnimatePresence initial={false}>
+						<motion.div
+							key={activeTab}
+							className="absolute inset-y-0 my-1 rounded-full bg-white"
+							initial={{ x: `${getTabIndex(prevActiveTab) * 100}%` }}
+							animate={{ x: `${getTabIndex(activeTab) * 100}%` }}
+							transition={{ type: "spring", stiffness: 300, damping: 30 }}
+							style={{ width: `${100 / tabs.length}%` }}
+						/>
+					</AnimatePresence>
+					{tabs.map((tab) => (
+						<motion.button
+							key={tab.id}
+							className={`relative z-10 flex w-full items-center justify-center gap-1.5 px-5 py-3 text-sm font-bold transition-colors duration-300 ${
+								activeTab === tab.id ? "font-bold text-black" : "text-gray-500"
+							} ${touchedTab === tab.id ? "blur-sm" : ""}`}
+							onClick={() => handleTabClick(tab.id)}
+						>
+							{tab.icon}
+							{tab.label}
+						</motion.button>
+					))}
+				</div>
+			</div>
+
+			{/* Coluna da direita: Placeholder para equilibrar o grid */}
+			<div className="flex justify-start m-4">
+				<div className="w-10" />
+			</div>
+		</div>
+	);
+}
+
+-----
+[ File: /home/imedeiros/apps/magoia-master-server/src/app/components/animata/card/glowing-card.tsx ]
+-----
+"use client";
+import React from "react";
+import { cn } from "@/lib/utils";
+
+interface GlowCardProps extends React.HTMLAttributes<HTMLDivElement> {
+	fromColor?: string;
+	viaColor?: string;
+	toColor?: string;
+	title?: string;
+	children?: React.ReactNode;
+}
+
+export default function GlowingCard({
+	fromColor = "#adff00",
+	viaColor = "#028900",
+	toColor = "#00ff83",
+	title = "Glowing",
+	children,
+	className,
+	...props
+}: GlowCardProps) {
+	return (
+		// 1) Container `relative` e Tamanho fixo de 313×300
+		<div
+			{...props}
+			className={cn(
+				"relative h-[300px] w-[260px]", // <-- tamanho fixo aqui
+				"rounded-3xl bg-gradient-to-r p-0.5",
+				"hover:shadow-glow hover:brightness-150",
+				"transition-all duration-500",
+				className,
+			)}
+			style={{
+				backgroundImage: `linear-gradient(to right, ${fromColor}, ${viaColor}, ${toColor})`,
+				transition: "box-shadow 0.5s ease",
+			}}
+		>
+			{/* 2) Camada de blur/gradiente, ABSOLUTA */}
+			{/* <div
+				className={cn(
+					"pointer-events-none absolute inset-0 rounded-3xl",
+					// Se "blur-20" não existir no seu Tailwind, use "blur-[20px]" ou "blur-xl"
+					"blur-[20px]",
+				)}
+				style={{
+					// Se quiser repetir o mesmo gradiente do contêiner
+					// backgroundImage: `linear-gradient(to right, ${fromColor}, ${viaColor}, ${toColor})`,
+					backgroundColor: 'black',
+					transition: "filter 0.5s ease",
+				}}
+			/> */}
+
+			{/* 3) Conteúdo real em `relative z-10`, ocupa 100% do contêiner */}
+			<div
+				className="
+          relative z-10
+          flex flex-col gap-2
+          h-full w-full
+          rounded-3xl
+          bg-opacity-100
+          px-5
+					py-6
+					
+        "
+				// style={{
+				// 	backgroud: "#563e7b",
+				// }}
+				style={{
+					background: "#1e293b35",
+					transition: "filter 0.5s ease",
+				}}
+			>
+				<div className="mb-2 text-xl text-gray-50">{title}</div>
+				{children}
+			</div>
+		</div>
+	);
+}
+
+-----
+[ File: /home/imedeiros/apps/magoia-master-server/src/app/components/Avatar/index.tsx ]
+-----
+
+-----
+[ File: /home/imedeiros/apps/magoia-master-server/src/app/components/CardClimate/index.tsx ]
+-----
+"use client";
+
+import React, { useCallback, useState, useEffect } from "react";
+
+/*
+ * NextUI Components
+ */
+import { Card, CardHeader, CardBody, CardFooter } from "@heroui/card";
+import { Button } from "@heroui/button";
+import { Slider } from "@heroui/slider";
+
+/**
+ * HOCs
+ */
+import MinimalCard from "../MinimalCard";
+
+/**
+ * Entities
+ */
+import { HvacMode } from "@app/haProvider/entities";
+import { useTheme } from "next-themes";
+
+/**
+ * Component
+ */
+const CardClimate = ({ airInfo, changeTemperature, isOn }) => {
+	const { attributes, state } = airInfo;
+	const [currentTemperature, setCurrentTemperature] = useState(attributes.temperature);
+
+	useEffect(() => {
+		setCurrentTemperature(attributes.temperature);
+	}, [airInfo]);
+
+	const isOff = (state) => state === HvacMode.OFF;
+
+	function ligarAr() {
+		changeTemperature({
+			domain: "climate",
+			service: "set_hvac_mode",
+			service_data: {
+				entity_id: "climate.ar",
+				hvac_mode: "cool",
+			},
+		})
+			.then((resposta) => {
+				setCurrentTemperature(attributes.temperature);
+			})
+			.catch((err) => console.error("Erro ao chamar serviço:", err));
+	}
+
+	function desligarAr() {
+		changeTemperature({
+			domain: "climate",
+			service: "turn_off",
+			service_data: {
+				entity_id: "climate.ar",
+			},
+		})
+			.then((resposta) => resposta)
+			.catch((err) => console.error("Erro ao chamar serviço:", err));
+	}
+
+	const setTemperature = useCallback((value) => {
+		changeTemperature({
+			domain: "climate",
+			service: "set_temperature",
+			service_data: {
+				entity_id: "climate.ar",
+				temperature: value,
+			},
+		});
+		setCurrentTemperature(value);
+	}, []);
+
+	const { setTheme } = useTheme();
+	return (
+		<Card className="climate-card" radius="lg" shadow="md" isBlurred>
+			<CardHeader className="flex gap-3">
+				<div className="flex flex-row">
+					<b className="text-lg">Ar Condicionado</b>
+				</div>
+			</CardHeader>
+			<CardBody className="py-2">
+				<div className="flex flex-col gap-6 w-full max-w-md">
+					<Slider
+						id="temperature-slider"
+						isDisabled={isOff(state)}
+						className="max-w-md"
+						color="foreground"
+						defaultValue={attributes.temperature}
+						label="Temperatura"
+						value={currentTemperature}
+						maxValue={30}
+						minValue={18}
+						showSteps={true}
+						size="md"
+						step={1}
+						onChange={(value) => setCurrentTemperature(value)}
+						onChangeEnd={(value) =>
+							changeTemperature({
+								domain: "climate",
+								service: "set_temperature",
+								service_data: {
+									entity_id: "climate.ar",
+									temperature: value,
+								},
+							})
+						}
+						renderThumb={(props) => (
+							<div
+								{...props}
+								className="group p-1 top-1/2 bg-background border-small border-default-200 dark:border-default-400/50 shadow-medium rounded-full cursor-grab data-[dragging=true]:cursor-grabbing"
+							>
+								<span className="transition-transform bg-gradient-to-br shadow-small from-secondary-100 to-secondary-500 rounded-full w-5 h-5 block group-data-[dragging=true]:scale-80" />
+							</div>
+						)}
+					/>
+				</div>
+			</CardBody>
+
+			<CardFooter className="flex flex-row gap-2">
+				<Button
+					onPress={isOff(state) ? ligarAr : desligarAr}
+					size="sm"
+					radius="full"
+					variant="shadow"
+					color={isOff(state) ? "success" : "danger"}
+				>
+					{isOff(state) ? "Ligar" : "Desligar"}
+				</Button>
+				<Button
+					className={currentTemperature == 18 ? "active-temperature" : ""}
+					size="sm"
+					onPress={() => setTemperature(18)}
+					radius="full"
+					variant="shadow"
+					color="primary"
+					isDisabled={isOff(state)}
+				>
+					18
+				</Button>
+				<Button
+					className={currentTemperature == 21 ? "active-temperature" : ""}
+					size="sm"
+					onPress={() => setTemperature(21)}
+					radius="full"
+					variant="shadow"
+					color="primary"
+					isDisabled={isOff(state)}
+				>
+					21
+				</Button>
+				<Button
+					className={currentTemperature == 23 ? "active-temperature" : ""}
+					size="sm"
+					onPress={() => setTemperature(23)}
+					radius="full"
+					variant="shadow"
+					color="primary"
+					isDisabled={isOff(state)}
+				>
+					23
+				</Button>
+			</CardFooter>
+		</Card>
+	);
+};
+
+export default MinimalCard(CardClimate);
+
+-----
+[ File: /home/imedeiros/apps/magoia-master-server/src/app/components/CardLights/index.tsx ]
+-----
+"use client";
+
+import React from "react";
+import { Card, CardHeader, CardBody, CardFooter } from "@heroui/card";
+import { Button } from "@heroui/button";
+import { useWebSocketContext } from "@app/haProvider/WebSocketProvider";
+
+const CardLights = () => {
+	const { callService } = useWebSocketContext();
+
+	const toggleLight = (entity) => {
+		console.log("🚀 ~ toggleLight ~ entity:", entity);
+		callService({
+			domain: "light",
+			service: "toggle",
+			service_data: {
+				entity_id: entity,
+			},
+		});
+	};
+
+	const setTemperature = (entity, kelvin) => {
+		console.log("🚀 ~ setTemperature ~ entity, kelvin:", entity, kelvin);
+		callService({
+			domain: "light",
+			service: "turn_on",
+			service_data: {
+				entity_id: entity,
+				transition: 5,
+				kelvin: kelvin,
+				brightness_pct: 100,
+			},
+		});
+	};
+
+	const setBrightness = (entity, brightness) => {
+		console.log("🚀 ~ setBrightness ~ entity, brightness:", entity, brightness);
+		callService({
+			domain: "light",
+			service: "turn_on",
+			service_data: {
+				entity_id: entity,
+				brightness_pct: brightness,
+			},
+		});
+	};
+
+	const turnOnAll = () => {
+		console.log("🚀 ~ turnOnAll ~ turnOnAll:");
+
+		callService({
+			domain: "light",
+			service: "turn_on",
+			service_data: { entity_id: "light.luz" },
+		});
+		callService({
+			domain: "light",
+			service: "turn_on",
+			service_data: { entity_id: "light.lampada_filamento_inteligente" },
+		});
+	};
+
+	const turnOffAll = () => {
+		console.log("🚀 ~ turnOffAll ~ turnOffAll:");
+
+		callService({
+			domain: "light",
+			service: "turn_off",
+			service_data: { entity_id: "light.luz" },
+		});
+		callService({
+			domain: "light",
+			service: "turn_off",
+			service_data: { entity_id: "light.lampada_filamento_inteligente" },
+		});
+	};
+
+	return (
+		<Card className="lights-card" radius="lg" shadow="md" isBlurred>
+			<CardHeader className="flex gap-3">
+				<div className="flex flex-row">
+					<b
+						className="text-lg cursor-pointer"
+						onClick={() => {
+							console.log("clicked in LUZ!!");
+							toggleLight("light.luz");
+						}}
+					>
+						Luz
+					</b>
+				</div>
+			</CardHeader>
+			<CardBody className="py-2 flex flex-col gap-4">
+				<div className="flex gap-4">
+					<Button
+						size="sm"
+						onPress={() => setTemperature("light.luz", 2000)}
+						color="warning"
+					>
+						Quente
+					</Button>
+					<Button
+						size="sm"
+						onPress={() => setTemperature("light.luz", 5000)}
+						color="primary"
+					>
+						Fria
+					</Button>
+				</div>
+				<div className="flex flex-row gap-4">
+					<b
+						className="text-lg cursor-pointer"
+						onClick={() => toggleLight("light.lampada_filamento_inteligente")}
+					>
+						Filamento
+					</b>
+				</div>
+				<div className="flex gap-4">
+					<Button
+						size="sm"
+						onPress={() => setBrightness("light.lampada_filamento_inteligente", 20)}
+						color="secondary"
+					>
+						20%
+					</Button>
+					<Button
+						size="sm"
+						onPress={() => setBrightness("light.lampada_filamento_inteligente", 100)}
+						color="primary"
+					>
+						100%
+					</Button>
+				</div>
+			</CardBody>
+			<CardFooter className="flex flex-row gap-2">
+				<Button
+					size="sm"
+					radius="full"
+					variant="shadow"
+					color="success"
+					onPress={turnOnAll}
+				>
+					Ligar Tudo
+				</Button>
+				<Button
+					size="sm"
+					radius="full"
+					variant="shadow"
+					color="danger"
+					onPress={turnOffAll}
+				>
+					Desligar Tudo
+				</Button>
+			</CardFooter>
+		</Card>
+	);
+};
+
+export default CardLights;
+
+-----
+[ File: /home/imedeiros/apps/magoia-master-server/src/app/components/Chart/index.tsx ]
+-----
+
+-----
+[ File: /home/imedeiros/apps/magoia-master-server/src/app/components/LottieIcons/index.tsx ]
+-----
+"use client";
+
+import React from "react";
+import Lottie from "react-lottie";
+
+interface LottieIconProps {
+	animationData: any;
+	styles?: any;
+}
+
+export default function LottieIcon({ animationData, styles }: LottieIconProps) {
+	const defaultOptions = {
+		loop: true,
+		autoplay: true,
+		animationData,
+		rendererSettings: {
+			preserveAspectRatio: "xMidYMid meet",
+		},
+	};
+
+	return (
+		<div className="w-full h-full flex justify-center items-center">
+			<Lottie options={defaultOptions} style={{ width: "100%", height: "100%", ...styles }} />
+		</div>
+	);
+}
+
+-----
+[ File: /home/imedeiros/apps/magoia-master-server/src/app/components/MinimalCard/index.tsx ]
+-----
+"use client";
+
+import React, { useState, useRef } from "react";
+
+/**
+ * Components
+ */
+import LottieIcon from "../LottieIcons";
+import { Card, CardBody } from "@heroui/card";
+
+/**
+ * Utils
+ */
+import { cn } from "@/lib/utils";
+
+/**
+ * Types
+ */
+interface MinimalCardProps {
+	icon?: any;
+	isOn: boolean;
+}
+
+/**
+ * MinimalCard Component
+ */
+export default function MinimalCard<T extends object>(WrappedComponent: React.ComponentType<T>) {
+	return function (props: T & MinimalCardProps) {
+		const [isMinimal, setIsMinimal] = useState(false);
+		const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+		const handleLongPressStart = () => {
+			timerRef.current = setTimeout(() => setIsMinimal((prev) => !prev), 300);
+		};
+
+		const handleLongPressEnd = () => {
+			if (timerRef.current) {
+				clearTimeout(timerRef.current);
+			}
+		};
+
+		return (
+			<div
+				className={cn(
+					"flex w-fit h-fit transition-all duration-200 ease-in-out",
+					isMinimal ? "w-32 h-32 items-center justify-center" : "w-fit",
+				)}
+			>
+				<div
+					className={cn(
+						"relative transition-all duration-300 ease-in-out transform",
+						isMinimal ? "scale-75" : "scale-100",
+					)}
+					onMouseDown={handleLongPressStart}
+					onMouseUp={handleLongPressEnd}
+					onTouchStart={handleLongPressStart}
+					onTouchEnd={handleLongPressEnd}
+					onContextMenu={(e) => e.preventDefault()}
+				>
+					{isMinimal ? (
+						<Card className="minimal-climate-card" radius="lg" shadow="md" isBlurred>
+							<CardBody>
+								<LottieIcon
+									animationData={props.icon}
+									styles={{
+										filter: props.isOn ? "saturate(2)" : "brightness(0.5)",
+									}}
+								/>
+							</CardBody>
+						</Card>
+					) : (
+						<WrappedComponent {...props} />
+					)}
+				</div>
+			</div>
+		);
+	};
+}
+
+-----
+[ File: /home/imedeiros/apps/magoia-master-server/src/app/components/PageContentWrapper/index.tsx ]
+-----
+"use client";
+
+import React, { useCallback, useState } from "react";
+
+/**
+ * NextUI Components
+ */
+import { Card, CardHeader, CardBody, CardFooter } from "@heroui/card";
+import { Slider } from "@heroui/slider";
+
+import AnimatedBeam from "../animata/background/animated-beam";
+
+/**
+ * Entities
+ */
+import { CallServiceMessage, Climate } from "@app/haProvider/entities";
+import FluidTabs from "../animata/card/fluid-tabs";
+
+/**
+ * Component
+ */
+const PageContentWrapper = ({ components, weatherConfigs }) => {
+	return (
+		<div className="page-content-wrapper">
+			<AnimatedBeam weatherConfigs={weatherConfigs}>
+				<FluidTabs />
+				<div className="page-content-wrapper__components p-4">
+					{components.map((component, index) => (
+						<React.Fragment key={index}>{component}</React.Fragment>
+					))}
+				</div>
+			</AnimatedBeam>
+		</div>
+	);
+};
+
+export default PageContentWrapper;

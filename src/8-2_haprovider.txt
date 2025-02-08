@@ -1,0 +1,544 @@
+[ File: /home/imedeiros/apps/magoia-master-server/src/app/haProvider/entities/Climate.ts ]
+-----
+/**
+ * Representa uma entidade de controle de clima.
+ */
+export interface Climate {
+	/**
+	 * ID único da entidade no sistema (ex.: "climate.ar").
+	 */
+	entity_id: string;
+
+	/**
+	 * Estado atual do dispositivo. Pode ser "off", "auto", "cool", "fan_only", ou "dry".
+	 */
+	state: HvacMode;
+
+	/**
+	 * Atributos adicionais associados à entidade.
+	 */
+	attributes: ClimateAttributes;
+}
+
+/**
+* Modos de operação HVAC.
+*/
+export enum HvacMode {
+	OFF = "off",
+	AUTO = "auto",
+	COOL = "cool",
+	FAN_ONLY = "fan_only",
+	DRY = "dry",
+}
+
+/**
+* Modos de ventilação suportados.
+*/
+export enum FanMode {
+	AUTO = "auto",
+	HIGH = "high",
+	MID = "mid",
+	LOW = "low",
+}
+
+/**
+* Atributos da entidade de clima.
+*/
+export interface ClimateAttributes {
+	/**
+	 * Modos de operação suportados pela entidade.
+	 */
+	hvac_modes: HvacMode[];
+
+	/**
+	 * Temperatura mínima configurável em graus Celsius.
+	 */
+	min_temp: number;
+
+	/**
+	 * Temperatura máxima configurável em graus Celsius.
+	 */
+	max_temp: number;
+
+	/**
+	 * Incremento permitido para ajuste de temperatura alvo.
+	 */
+	target_temp_step: number;
+
+	/**
+	 * Modos de ventilação suportados.
+	 */
+	fan_modes: FanMode[];
+
+	/**
+	 * Temperatura atual medida pelo dispositivo em graus Celsius.
+	 */
+	current_temperature: number;
+
+	/**
+	 * Temperatura alvo configurada em graus Celsius.
+	 */
+	temperature: number;
+
+	/**
+	 * Modo de ventilação atualmente ativo.
+	 */
+	fan_mode: FanMode;
+
+	/**
+	 * Nome amigável da entidade.
+	 */
+	friendly_name: string;
+
+	/**
+	 * Recursos suportados pela entidade representados como bitmask.
+	 */
+	supported_features: number;
+}
+
+-----
+[ File: /home/imedeiros/apps/magoia-master-server/src/app/haProvider/entities/haEvents.ts ]
+-----
+// Enums para os tipos de mensagens
+export enum MessageType {
+	AUTH = "auth",
+	SUBSCRIBE_EVENTS = "subscribe_events",
+	SUBSCRIBE_TRIGGER = "subscribe_trigger",
+	UNSUBSCRIBE_EVENTS = "unsubscribe_events",
+	FIRE_EVENT = "fire_event",
+	CALL_SERVICE = "call_service",
+	GET_STATES = "get_states",
+	GET_CONFIG = "get_config",
+	GET_SERVICES = "get_services",
+	GET_PANELS = "get_panels",
+	PING = "ping",
+	VALIDATE_CONFIG = "validate_config",
+	EVENT = "event",
+}
+
+// Interfaces reutilizáveis
+
+export interface Context {
+	id: string;
+	parent_id: string | null;
+	user_id: string | null;
+}
+
+export interface State<T> {
+	entity_id: string;
+	state: string;
+	attributes: T;
+	last_changed: string; // ISO Date String
+	last_reported: string; // ISO Date String
+	last_updated: string; // ISO Date String
+	context: Context;
+}
+
+export interface EventData<T> {
+	entity_id: string;
+	old_state: State<T> | null;
+	new_state: State<T> | null;
+}
+
+export interface Event<T> {
+	event_type: string;
+	data: EventData<T>;
+	origin: "LOCAL" | "REMOTE";
+	time_fired: string; // ISO Date String
+	context: Context;
+}
+
+// Interface base genérica
+
+export interface BaseMessage {
+	id: number;
+	type: MessageType;
+}
+
+// Interfaces específicas por tipo
+
+// Auth
+export interface AuthMessage extends BaseMessage {
+	type: MessageType.AUTH;
+	access_token: string;
+}
+
+// Subscribe Events
+export interface SubscribeEventsMessage extends BaseMessage {
+	type: MessageType.SUBSCRIBE_EVENTS;
+	event_type: string; // Ex.: "state_changed"
+}
+
+// Subscribe Trigger
+export interface SubscribeTriggerMessage extends BaseMessage {
+	type: MessageType.SUBSCRIBE_TRIGGER;
+	trigger: {
+			platform: "state";
+			entity_id: string;
+			from: string;
+			to: string;
+	};
+}
+
+// Unsubscribe Events
+export interface UnsubscribeEventsMessage extends BaseMessage {
+	type: MessageType.UNSUBSCRIBE_EVENTS;
+	subscription: number;
+}
+
+// Fire Event
+export interface FireEventMessage extends BaseMessage {
+	type: MessageType.FIRE_EVENT;
+	event_type: string;
+	event_data: Record<string, any>;
+}
+
+// Call Service
+export interface CallServiceMessage extends BaseMessage {
+	type: MessageType.CALL_SERVICE;
+	domain: string;
+	service: string;
+	service_data?: Record<string, any>;
+	target?: {
+			entity_id?: string;
+			[key: string]: any;
+	};
+}
+
+// Get States
+export interface GetStatesMessage extends BaseMessage {
+	type: MessageType.GET_STATES;
+}
+
+// Get Config
+export interface GetConfigMessage extends BaseMessage {
+	type: MessageType.GET_CONFIG;
+}
+
+// Get Services
+export interface GetServicesMessage extends BaseMessage {
+	type: MessageType.GET_SERVICES;
+}
+
+// Get Panels
+export interface GetPanelsMessage extends BaseMessage {
+	type: MessageType.GET_PANELS;
+}
+
+// Ping
+export interface PingMessage extends BaseMessage {
+	type: MessageType.PING;
+}
+
+// Validate Config
+export interface ValidateConfigMessage extends BaseMessage {
+	type: MessageType.VALIDATE_CONFIG;
+	trigger: {
+			platform: "state";
+			entity_id: string;
+			from: string;
+			to: string;
+	};
+}
+
+// Event State Changed
+export interface EventStateChanged<T> extends BaseMessage {
+	type: MessageType.EVENT;
+	event: {
+			event_type: "state_changed";
+			data: EventData<T>;
+			origin: "LOCAL" | "REMOTE";
+			time_fired: string; // ISO Date String
+			context: Context;
+	};
+}
+
+-----
+[ File: /home/imedeiros/apps/magoia-master-server/src/app/haProvider/entities/index.ts ]
+-----
+export * from "./Climate";
+export * from "./haEvents";
+
+-----
+[ File: /home/imedeiros/apps/magoia-master-server/src/app/haProvider/WebSocketProvider.tsx ]
+-----
+"use client";
+import React, { createContext, useContext, useEffect, useState, useRef } from "react";
+import useWebSocket from "react-use-websocket";
+
+const token = process.env.NEXT_PUBLIC_WEBSOCKET_TOKEN;
+
+// Valores padrão
+const defaultConfig = {
+  host: "raspberrypi",
+  protocol: "ws", // ou "wss" se usar SSL
+  port: 8123,
+  retryTimeout: 5000,
+  timeout: 5000,
+  retryCount: 10,
+  token: token, // Caso não use token, pode trocar por password
+};
+
+export function useHomeAssistant(options = {}) {
+  // Mescla as opções passadas com o default
+  const config = { ...defaultConfig, ...options };
+
+  // Monta a URL do WebSocket
+  const socketUrl = `${config.protocol}://${config.host}:${config.port}/api/websocket`;
+
+  // Estados locais
+  const [states, setStates] = useState([]);
+  const [connectionStatus, setConnectionStatus] = useState("disconnected");
+
+  // "idRef" para controlar o contador de mensagens
+  const idRef = useRef(1);
+
+  // 1) Para chamadas "request/resposta" (get_states, call_service, etc.)
+  //    promisesRef[mensagemId] = { timeout, callback }
+  const promisesRef = useRef({});
+
+  // 2) Para subscriptions de eventos contínuos
+  //    subscriptionsRef[mensagemId] = { onEvent: callback }
+  const subscriptionsRef = useRef({});
+
+  // react-use-websocket
+  // ------------------------------------------------------------------
+  const { sendJsonMessage, lastJsonMessage, readyState } = useWebSocket(socketUrl, {
+    shouldReconnect: () => true, // Reconexão automática
+    reconnectAttempts: config.retryCount,
+    reconnectInterval: config.retryTimeout,
+    onOpen: () => {
+      setConnectionStatus("connected");
+      // Assim que conectar, tentamos autenticar
+      authenticate();
+    },
+    onError: () => {
+      setConnectionStatus("connection_error");
+    },
+    onClose: () => {
+      setConnectionStatus("connection_closed");
+    },
+  });
+
+  // ------------------------------------------------------------------
+  // Função de autenticação
+  function authenticate() {
+    if (!config.token) {
+      console.error("Nenhum token fornecido para Home Assistant");
+      return;
+    }
+    // Envia mensagem de autenticação
+    sendJsonMessage({
+      type: "auth",
+      access_token: config.token,
+    });
+  }
+
+  // ------------------------------------------------------------------
+  // Efeito para processar mensagens recebidas (lastJsonMessage)
+  useEffect(() => {
+    if (!lastJsonMessage) return;
+    const data: any = lastJsonMessage;
+
+    // 1) Mensagens de autenticação
+    if (data.type === "auth_ok") {
+      setConnectionStatus("authenticated");
+      // Ao autenticar, podemos obter estados iniciais
+      getStates()
+        .then((response: any) => {
+          setStates(response.result || []);
+          // Depois de obter estados, assina evento 'state_changed'
+          subscribeEvents("state_changed", updateState);
+        })
+        .catch((err) => console.error("Erro ao obter estados:", err));
+    }
+
+    if (data.type === "auth_required") {
+      // Se token estiver configurado, reenviamos
+      authenticate();
+    }
+
+    if (data.type === "auth_invalid") {
+      console.error("Token inválido para Home Assistant");
+      setConnectionStatus("auth_invalid");
+      return;
+    }
+
+    // 2) Resolução de promises para mensagens de "result"
+    //    Ex.: get_states, call_service, etc.
+    if (data.type === "result" && data.id) {
+      const promiseObj = promisesRef.current[data.id];
+      if (promiseObj) {
+        // Resolvemos e deletamos a promise
+        const { callback, timeout } = promiseObj;
+        if (timeout) clearTimeout(timeout);
+        if (callback) callback(data);
+        delete promisesRef.current[data.id];
+      }
+
+      // Se for uma assinatura de eventos (subscribe_events), e deu certo,
+      // guardamos o callback em subscriptionsRef. Mas *apenas* se foi success = true.
+      if (data.success) {
+        // Verifica se a mensagem original era subscribe_events
+        // Podemos guardar a callback *depois* do .then() lá na subscribeEvents,
+        // ou verificar aqui. Aqui é mais "automático".
+        // MAS para isso, precisamos saber se era "subscribe_events"
+        // A maneira mais simples é: no .then() do subscribeEvents, já armazenar.
+      }
+    }
+
+    // 3) Mensagens de tipo "event" (recebidas continuamente para as subscriptions)
+    if (data.type === "event" && data.id) {
+      // data.id = "id da subscription"
+      const subscription = subscriptionsRef.current[data.id];
+      if (subscription && subscription.onEvent) {
+        subscription.onEvent(data);
+      }
+    }
+  }, [lastJsonMessage]);
+
+  // ------------------------------------------------------------------
+  // Envio de mensagens com ID
+  function send(message, addId = true) {
+    return new Promise((resolve, reject) => {
+      let msg = { ...message };
+
+      if (addId) {
+        msg.id = idRef.current;
+        idRef.current += 1;
+      }
+
+      const timeout = setTimeout(() => {
+        reject(new Error("Não houve resposta do Home Assistant"));
+      }, config.timeout);
+
+      promisesRef.current[msg.id] = {
+        callback: resolve,
+        timeout,
+      };
+
+
+      sendJsonMessage(msg);
+    });
+  }
+
+  // ------------------------------------------------------------------
+  // Métodos principais (similar aos da classe Homeassistant)
+  function getStates() {
+    return send({ type: "get_states" });
+  }
+
+  /**
+   * Faz a assinatura de eventos, e quando chegar a *primeira resposta* (type: "result", success: true),
+   * armazenamos o callback em `subscriptionsRef`. Depois, cada vez que vier
+   * data.type === "event" e data.id === esse ID, chamaremos "callbackFn(data)".
+   */
+  function subscribeEvents(event_type = "state_changed", callbackFn) {
+    const subscribeData = {
+      type: "subscribe_events",
+      event_type,
+    };
+
+    return send(subscribeData).then((data: any) => {
+
+      if (!data.success) {
+        return Promise.reject(new Error("Falha ao assinar evento: " + event_type));
+      }
+
+      // Agora sabemos que o HA criou a subscription com `id = data.id`.
+      // Guardamos a callback no `subscriptionsRef`.
+      subscriptionsRef.current[data.id] = {
+        onEvent: callbackFn,
+      };
+
+      // Retornamos o `data.id`, para poder desinscrever depois, se necessário.
+      return data.id;
+    });
+  }
+
+  /**
+   * Desinscreve de um subscriptionId (normalmente obtido pelo .then do subscribeEvents).
+   * Ao receber sucesso, removemos de subscriptionsRef.
+   */
+  function unsubscribeEvents(subscriptionId) {
+    return send({ type: "unsubscribe_events", subscription: subscriptionId }).then((res) => {
+      if (subscriptionsRef.current[subscriptionId]) {
+        delete subscriptionsRef.current[subscriptionId];
+      }
+      return res;
+    });
+  }
+
+  function callService(serviceData) {
+    // Exemplo: { domain: 'light', service: 'turn_on', service_data: {entity_id: 'light.room'} }
+    return send({ type: "call_service", ...serviceData });
+  }
+
+  // ------------------------------------------------------------------
+  // Atualiza estado local quando receber "state_changed"
+  function updateState(change) {
+    const { event } = change;
+    if (!event || event.event_type !== "state_changed") return;
+
+    const { data } = event; // { entity_id, old_state, new_state }
+    if (!data) return;
+
+    // Atualiza o array de estados
+    setStates((prevStates) => {
+      const idx = prevStates.findIndex((s) => s.entity_id === data.entity_id);
+      if (idx === -1) {
+        // Se não existe, insere
+        return [...prevStates, data.new_state];
+      } else {
+        // Se existe, substitui pelo novo
+        const updated = [...prevStates];
+        updated[idx] = data.new_state;
+        return updated;
+      }
+    });
+  }
+
+  // ------------------------------------------------------------------
+  // Helper para obter o estado atual de uma entity_id específica
+  function getState(entityId) {
+    return states.find((s) => s.entity_id === entityId);
+  }
+
+  // ------------------------------------------------------------------
+  // Retorna métodos e dados que o "HomeAssistantProvider" vai expor
+  return {
+    connectionStatus,
+    readyState,
+    states,
+    getState,
+    callService,
+    subscribeEvents,
+    unsubscribeEvents,
+    send, // Envio genérico, se precisar
+  };
+}
+
+// --------------------------------------------------------------------
+// Contexto e Provider
+const HomeAssistantContext = createContext(null);
+
+export function WebSocketProvider({ children }) {
+  // Instancia a lógica do Home Assistant
+  const ha = useHomeAssistant();
+
+  return (
+    <HomeAssistantContext.Provider value={ha}>
+      {children}
+    </HomeAssistantContext.Provider>
+  );
+}
+
+export function useWebSocketContext() {
+  const context = useContext(HomeAssistantContext);
+  if (!context) {
+    throw new Error(
+      "useHomeAssistantContext deve ser usado dentro de um <HomeAssistantProvider>"
+    );
+  }
+  return context;
+}

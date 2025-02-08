@@ -1,14 +1,8 @@
 .climate-card {
-	width: 313px;
+	width: 250px;
 	height: 300px;
-
-	[data-slot="value"] {
-		height: 40px;
-		font-size: 3rem; /* ~ text-xl */
-		font-weight: 700;   /* ~ font-bold */
-		z-index: 10;
-	}
-	.active-temperature {
-		font-size: 110%; /* ~ text-xl */
-	}
+	border: 5px ridge #e0aa3e;
+	box-shadow: 0 0 5px rgb(224, 62, 62), 
+	            0 0 10px #ffcc70 inset;
+	border-radius: 12px;
 }

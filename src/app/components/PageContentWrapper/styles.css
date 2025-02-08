@@ -3,7 +3,22 @@
 	flex-direction: column;
 	width: 100%;
 
-	&__components {
-		padding: 16px;
+}
+
+.page-content-wrapper__components {
+	display: flex;
+	gap: 48px;
+}
+
+* {
+	user-select: none; /* Bloqueia seleção de texto */
+	-webkit-user-select: none; /* Safari e Chrome */
+	-moz-user-select: none; /* Firefox */
+	-ms-user-select: none; /* Internet Explorer */
+}
+
+@media (hover: none) {
+	html, body {
+			cursor: none;
 	}
 }

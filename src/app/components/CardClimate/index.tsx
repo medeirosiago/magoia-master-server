@@ -3,11 +3,14 @@
 import React, { useCallback, useState, useEffect } from "react";
 
 /*
- * NextUI Components
+ * Components
  */
 import { Card, CardHeader, CardBody, CardFooter } from "@heroui/card";
-import { Button } from "@heroui/button";
+import { Button, ButtonGroup } from "@heroui/button";
 import { Slider } from "@heroui/slider";
+
+import LottieIcon from "@app/components/LottieIcons/";
+import airOffIcon from "@app/components/LottieIcons/looties/airOffIcon.json";
 
 /**
  * HOCs
@@ -26,10 +29,21 @@ import { useTheme } from "next-themes";
 const CardClimate = ({ airInfo, changeTemperature, isOn }) => {
 	const { attributes, state } = airInfo;
 	const [currentTemperature, setCurrentTemperature] = useState(attributes.temperature);
+	const [isAnimating, setIsAnimating] = useState(false); // Estado para controlar a animação
 
 	useEffect(() => {
-		setCurrentTemperature(attributes.temperature);
-	}, [airInfo]);
+		if (attributes.temperature !== currentTemperature) {
+			setCurrentTemperature(attributes.temperature);
+		}
+	}, [attributes.temperature]);
+
+	useEffect(() => {
+		console.log("🚀 ~ CardClimate ~ isOn:", isOn);
+
+		if (!isOn) {
+			setIsAnimating(false); // Se desligado, fixa no primeiro frame
+		}
+	}, [isOn]);
 
 	const isOff = (state) => state === HvacMode.OFF;
 
@@ -74,14 +88,14 @@ const CardClimate = ({ airInfo, changeTemperature, isOn }) => {
 
 	const { setTheme } = useTheme();
 	return (
-		<Card className="climate-card" radius="lg" shadow="md" isBlurred>
+		<Card className="climate-card" radius="lg" shadow="md">
 			<CardHeader className="flex gap-3">
 				<div className="flex flex-row">
 					<b className="text-lg">Ar Condicionado</b>
 				</div>
 			</CardHeader>
 			<CardBody className="py-2">
-				<div className="flex flex-col gap-6 w-full max-w-md">
+				<div className="flex flex-col gap-6">
 					<Slider
 						id="temperature-slider"
 						isDisabled={isOff(state)}
@@ -118,49 +132,62 @@ const CardClimate = ({ airInfo, changeTemperature, isOn }) => {
 				</div>
 			</CardBody>
 
-			<CardFooter className="flex flex-row gap-2">
+			<CardFooter className="relative gap-1 justify-between">
 				<Button
+					isIconOnly
 					onPress={isOff(state) ? ligarAr : desligarAr}
-					size="sm"
+					size="lg"
 					radius="full"
 					variant="shadow"
-					color={isOff(state) ? "success" : "danger"}
+					color={isOff(state) ? "danger" : "success"}
 				>
-					{isOff(state) ? "Ligar" : "Desligar"}
+					<LottieIcon
+						animationData={airOffIcon}
+						loop={false}
+						autoplay={true}
+						styles={{
+							width: "90px",
+							height: "90px",
+						}}
+					/>
 				</Button>
-				<Button
-					className={currentTemperature == 18 ? "active-temperature" : ""}
-					size="sm"
-					onPress={() => setTemperature(18)}
-					radius="full"
-					variant="shadow"
-					color="primary"
-					isDisabled={isOff(state)}
-				>
-					18
-				</Button>
-				<Button
-					className={currentTemperature == 21 ? "active-temperature" : ""}
-					size="sm"
-					onPress={() => setTemperature(21)}
-					radius="full"
-					variant="shadow"
-					color="primary"
-					isDisabled={isOff(state)}
-				>
-					21
-				</Button>
-				<Button
-					className={currentTemperature == 23 ? "active-temperature" : ""}
-					size="sm"
-					onPress={() => setTemperature(23)}
-					radius="full"
-					variant="shadow"
-					color="primary"
-					isDisabled={isOff(state)}
-				>
-					23
-				</Button>
+					<Button
+						className={currentTemperature == 18 ? "active-temperature" : ""}
+						size="lg"
+						isIconOnly
+						onPress={() => setTemperature(18)}
+						radius="full"
+						variant={currentTemperature == 18 ? 'shadow' : 'bordered'}
+						color="primary"
+						isDisabled={isOff(state)}
+					>
+						18
+					</Button>
+					<Button
+						className={currentTemperature == 21 ? "active-temperature" : ""}
+						size="lg"
+						isIconOnly
+						onPress={() => setTemperature(21)}
+						radius="full"
+						variant={currentTemperature == 21 ? 'shadow' : 'bordered'}
+						color="primary"
+						isDisabled={isOff(state)}
+					>
+						21
+					</Button>
+					<Button
+						className={currentTemperature == 23 ? "active-temperature" : ""}
+						size="lg"
+						isIconOnly
+
+						onPress={() => setTemperature(23)}
+						radius="full"
+						variant={currentTemperature == 23 ? 'shadow' : 'bordered'}
+						color="primary"
+						isDisabled={isOff(state)}
+					>
+						23
+					</Button>
 			</CardFooter>
 		</Card>
 	);

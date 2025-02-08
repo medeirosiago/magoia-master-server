@@ -9,7 +9,7 @@
   "build": "next build",
   "start": "next start",
   "lint": "next lint",
-  "build:css": "tailwindcss -i ./src/app/styles/globals.css -o ./public/styles/output.css --watch",
+  "build:css": "tailwindcss -i ./src/app/styles/globals.css -o ./public/styles/output.css",
   "dev-all": "concurrently \"npm run start-dev\" \"npm run dev\""
  },
  "keywords": [],

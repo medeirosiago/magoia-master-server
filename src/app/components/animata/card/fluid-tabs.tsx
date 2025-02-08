@@ -1,52 +1,29 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { BedDouble, House, BriefcaseBusiness } from "lucide-react";
-
-/**
- * HA
- */
+import { BedDouble, House, BriefcaseBusiness, RefreshCw } from "lucide-react";
 import { useWebSocketContext } from "@app/haProvider/WebSocketProvider";
+import { Avatar, AvatarGroup, Button } from "@heroui/react";
 
-/**
- * Hero UI
- */
-import { Avatar, AvatarGroup } from "@heroui/react";
-
-/**
- * Tabs config
- */
 const tabs = [
-	{
-		id: "home",
-		label: "Home",
-		icon: <House size={18} />,
-	},
-	{
-		id: "room",
-		label: "Quarto",
-		icon: <BedDouble size={18} />,
-	},
-	{
-		id: "work",
-		label: "Trabalho",
-		icon: <BriefcaseBusiness size={18} />,
-	},
+	{ id: "home", label: "Home", icon: <House size={18} /> },
+	{ id: "room", label: "Quarto", icon: <BedDouble size={18} /> },
+	{ id: "work", label: "Trabalho", icon: <BriefcaseBusiness size={18} /> },
 ];
 
-/**
- * Component
- */
 export default function FluidTabs() {
 	const [activeTab, setActiveTab] = useState("home");
 	const [touchedTab, setTouchedTab] = useState<string | null>(null);
 	const [prevActiveTab, setPrevActiveTab] = useState("home");
 	const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 	const { getState } = useWebSocketContext();
-	const { state: magoiaMonitor } = getState("switch.monitor_goia");
-	const { state: leticiaMonitor } = getState("switch.monitor_leticia");
 
+	// Obtendo estados do Home Assistant
+	const magoiaMonitorState = getState("switch.monitor_goia")?.state;
+	const leticiaMonitorState = getState("switch.monitor_leticia")?.state;
+
+	// Limpa o timeout quando o componente desmontar
 	useEffect(() => {
 		return () => {
 			if (timeoutRef.current) {
@@ -55,40 +32,43 @@ export default function FluidTabs() {
 		};
 	}, []);
 
-	const handleTabClick = (tabId: string) => {
-		setPrevActiveTab(activeTab);
-		setActiveTab(tabId);
-		setTouchedTab(tabId);
+	// Atualiza a aba ativa apenas se necessário
+	const handleTabClick = useCallback(
+		(tabId: string) => {
+			if (tabId !== activeTab) {
+				setPrevActiveTab(activeTab);
+				setActiveTab(tabId);
+			}
 
-		if (timeoutRef.current) {
-			clearTimeout(timeoutRef.current);
-		}
-		timeoutRef.current = setTimeout(() => {
-			setTouchedTab(null);
-		}, 300);
-	};
+			setTouchedTab(tabId);
 
+			if (timeoutRef.current) {
+				clearTimeout(timeoutRef.current);
+			}
+			timeoutRef.current = setTimeout(() => setTouchedTab(null), 300);
+		},
+		[activeTab] // Garante que o `useCallback` só recria a função se `activeTab` mudar
+	);
+
+	// Obtém índice da aba para animação
 	const getTabIndex = (tabId: string) => tabs.findIndex((tab) => tab.id === tabId);
+
+	// Função para recarregar a página
+	const handleReload = () => {
+		window.location.reload();
+	};
 
 	return (
 		<div className="grid grid-cols-[270px_540px_214px] items-center">
-			{/* Coluna da esquerda: Avatares alinhados à direita */}
+			{/* Avatares alinhados à direita */}
 			<div className="flex items-center justify-end">
 				<AvatarGroup isBordered>
-					<Avatar
-						src="/images/let_avatar.jpg"
-						color="secondary"
-						isDisabled={leticiaMonitor !== "on"}
-					/>
-					<Avatar
-						src="/images/goia_avatar.jpg"
-						color="primary"
-						isDisabled={magoiaMonitor !== "on"}
-					/>
+					<Avatar src="/images/let_avatar.jpg" color="secondary" isDisabled={leticiaMonitorState !== "on"} />
+					<Avatar src="/images/goia_avatar.jpg" color="primary" isDisabled={magoiaMonitorState !== "on"} />
 				</AvatarGroup>
 			</div>
 
-			{/* Coluna do meio: Menu centralizado */}
+			{/* Menu centralizado */}
 			<div className="flex items-center justify-center py-4">
 				<div className="relative flex w-full max-w-md space-x-2 overflow-hidden rounded-full bg-[#f5f1eb] shadow-lg dark:bg-background/80 backdrop-blur-md backdrop-saturate-150 transition-transform-background motion-reduce:transition-none">
 					<AnimatePresence initial={false}>
@@ -116,9 +96,18 @@ export default function FluidTabs() {
 				</div>
 			</div>
 
-			{/* Coluna da direita: Placeholder para equilibrar o grid */}
-			<div className="flex justify-start m-4">
-				<div className="w-10" />
+			{/* Botão de recarregar a página alinhado à direita */}
+			<div className="flex justify-end m-4">
+				<Button
+					onPress={handleReload}
+					color="primary"
+					variant="shadow"
+					radius="full"
+					className="flex items-center gap-2"
+				>
+					<RefreshCw size={18} />
+					Recarregar
+				</Button>
 			</div>
 		</div>
 	);

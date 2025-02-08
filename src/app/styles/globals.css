@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 @import "../components/CardClimate/styles.css";
+@import "../components/CardLights/styles.css";
 @import "../components/PageContentWrapper/styles.css";
 @import "../components/animata/background/styles.css";
 @import "../components/MinimalCard/styles.css";

@@ -24,7 +24,7 @@ const PageContentWrapper = ({ components, weatherConfigs }) => {
 		<div className="page-content-wrapper">
 			<AnimatedBeam weatherConfigs={weatherConfigs}>
 				<FluidTabs />
-				<div className="page-content-wrapper__components p-4">
+				<div className="page-content-wrapper__components py-4 px-10">
 					{components.map((component, index) => (
 						<React.Fragment key={index}>{component}</React.Fragment>
 					))}
