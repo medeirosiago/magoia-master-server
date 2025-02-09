@@ -7,7 +7,7 @@
 
 .page-content-wrapper__components {
 	display: flex;
-	gap: 48px;
+	gap: 40px;
 }
 
 * {

@@ -7,6 +7,7 @@ import React, { useState, useRef } from "react";
  */
 import LottieIcon from "../LottieIcons";
 import { Card, CardBody } from "@heroui/card";
+import { Button } from "@heroui/button";
 
 /**
  * Utils
@@ -19,6 +20,7 @@ import { cn } from "@/lib/utils";
 interface MinimalCardProps {
 	icon?: any;
 	isOn: boolean;
+	minimizeButton?: React.ReactNode; // Agora aceita
 }
 
 /**
@@ -39,6 +41,25 @@ export default function MinimalCard<T extends object>(WrappedComponent: React.Co
 			}
 		};
 
+		const minimizeButton = () => {
+			return (
+				<Button
+					size="lg"
+					isIconOnly
+					radius="full"
+					style={{
+						backgroundColor: "rgba(255, 255, 255, 0.03)", // Leve transparência
+						border: "0.5px solid rgba(255, 255, 255, 0.6)", // Borda fina cinza-branca
+						backdropFilter: "blur(20px)", // Efeito blurry
+						boxShadow: "0 0 20px rgba(255, 255, 255, 0.3)", // Shadow suave ao redor
+					}}
+					onMouseDown={handleLongPressStart}
+					onMouseUp={handleLongPressEnd}
+					onTouchStart={handleLongPressStart}
+					onTouchEnd={handleLongPressEnd}
+				/>
+			);
+		};
 		return (
 			<div
 				className={cn(
@@ -51,10 +72,10 @@ export default function MinimalCard<T extends object>(WrappedComponent: React.Co
 						"relative transition-all duration-300 ease-in-out transform",
 						isMinimal ? "scale-75" : "scale-100",
 					)}
-					onMouseDown={handleLongPressStart}
-					onMouseUp={handleLongPressEnd}
-					onTouchStart={handleLongPressStart}
-					onTouchEnd={handleLongPressEnd}
+					onMouseDown={isMinimal ? handleLongPressStart : undefined}
+					onMouseUp={isMinimal ? handleLongPressEnd : undefined}
+					onTouchStart={isMinimal ? handleLongPressStart : undefined}
+					onTouchEnd={isMinimal ? handleLongPressEnd : undefined}
 					onContextMenu={(e) => e.preventDefault()}
 				>
 					{isMinimal ? (
@@ -78,7 +99,7 @@ export default function MinimalCard<T extends object>(WrappedComponent: React.Co
 							</CardBody>
 						</Card>
 					) : (
-						<WrappedComponent {...props} />
+						<WrappedComponent {...props} MinimizeButton={minimizeButton} />
 					)}
 				</div>
 			</div>

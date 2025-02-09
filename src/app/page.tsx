@@ -22,7 +22,6 @@ import { weatherConfigs } from "./utils/weatherConfigs";
  * Entities
  */
 import { HvacMode, Climate } from "./haProvider/entities";
-import CardClimate from "./components/CardClimate";
 import PageContentWrapper from "./components/PageContentWrapper";
 import AnimatedBeam from "./components/animata/background/animated-beam";
 
@@ -30,6 +29,12 @@ import AnimatedBeam from "./components/animata/background/animated-beam";
  * Icons
  */
 import SnowFlakeIcon from "@app/components/LottieIcons/looties/snowflake.json";
+import CardLightsIcon from "@app/components/LottieIcons/looties/cardLightsIcon.json";
+
+/**
+ * Cards
+ */
+import CardClimate from "./components/CardClimate";
 import CardLights from "./components/CardLights";
 
 /**
@@ -65,10 +70,16 @@ function Page() {
 	const weatherEntity = getState("weather.astroweather_quarto");
 	const clockEntity = getState("sensor.date_time");
 	const forecastState = getState("weather.forecast_home")?.state;
+	const filamentoState = getState("light.lampada_filamento_inteligente");
+	console.log("🚀 ~ Page ~ filamentoState:", filamentoState);
+	const luzState = getState("light.luz");
+	console.log("🚀 ~ Page ~ luzState:", luzState);
 	const magoiaMonitor = getState("switch.monitor_goia");
 	const leticiaMonitor = getState("switch.monitor_leticia");
 
 	const isAirOn = airEntity?.state !== "off";
+	const isFilamentoOn = filamentoState?.state !== "off";
+	const isLuzOn = luzState?.state !== "off";
 
 	const isLoading =
 		!airEntity ||
@@ -110,8 +121,13 @@ function Page() {
 						changeTemperature={callService}
 						icon={SnowFlakeIcon}
 						isOn={isAirOn}
+						MinimizeButton={null}
 					/>,
-					<CardLights />,
+					<CardLights
+						isOn={isFilamentoOn || isLuzOn}
+						icon={CardLightsIcon}
+						MinimizeButton={null}
+					/>,
 				]}
 				weatherConfigs={weatherConfigs({
 					attributes: weatherEntity?.attributes,
